@@ -1,0 +1,79 @@
+# Placeholder: Git ignore rules for the project.
+
+#python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Virtual Environment
+venv/
+ENV/
+env/
+Ai.env/
+
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+
+# Data & Models
+backend/data/raw/**
+backend/data/processed/**
+!backend/data/raw/educational_materials/
+!backend/data/raw/educational_materials/.gitkeep
+# Textbooks are local learning content, not source code. The existing sample
+# textbook remains tracked, while future additions are kept out of Git.
+backend/Books/**
+!backend/Books/.gitkeep
+
+
+*.pkl
+*.pt
+*.pth
+*.bin
+
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.env.local
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+node_modules
