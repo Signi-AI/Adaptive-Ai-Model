@@ -93,6 +93,11 @@ class QuestionTemplate(Base):
         back_populates="question_templates"
     )
 
+    generated_questions = relationship(
+        "GeneratedQuestion", back_populates="template", cascade="all, delete-orphan"
+        )
+
+
 
     def __repr__(self) -> str: 
         # Muonekano rahisi wa object hii wakati wa debugging/logging
