@@ -6,15 +6,25 @@ subject_id is required, not optional.
 """
 
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import DateTime, ForeignKey, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
 
+if TYPE_CHECKING:
+    # Only seen by static type checkers (Pylance/mypy) - never runs.
+    # SQLAlchemy still resolves "Subject" and "Lesson" below via its
+    # own model registry at runtime, exactly as before; this import
+    # exists purely so your editor knows what those forward-reference
+    # strings point to and stops flagging them as undefined.
+    from app.models.lesson import Lesson
+    from app.models.subject import Subject
+
 
 class Topic(Base):
-    a = "topics"
+    __tablename__ = "topics"
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
@@ -31,5 +41,7 @@ class Topic(Base):
 
     subject: Mapped["Subject"] = relationship(back_populates="topics")
     lessons: Mapped[list["Lesson"]] = relationship(
-        back_populates="topic", cascade="all, delete-orphan"
+        back_populates="topic",
+        cascade="all, delete-orphan",
+        order_by="Lesson.order_index",
     )
