@@ -12,8 +12,8 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class StudentCreate(BaseModel):
-    name: str = Field(..., min_length=1, max_length=255)
-    class_level: str = Field(..., min_length=1, max_length=50, examples=["Form 2"])
+    name: str = Field(..., min_length=1, max_length=255,examples=["Comfotha Abdulkarim kalima"])
+    class_level: str = Field(..., min_length=1, max_length=7, examples=["Form 2"])
 
 
 class StudentRead(BaseModel):
