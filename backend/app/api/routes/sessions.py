@@ -4,6 +4,7 @@ api/routes/sessions.py
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from starlette import status
 
 from app.core.database import get_db
 from app.schemas.session import LastSessionRead
