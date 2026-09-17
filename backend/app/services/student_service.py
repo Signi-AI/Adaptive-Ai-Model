@@ -17,3 +17,16 @@ def create_student(db: Session, payload: StudentCreate) -> Student:
     db.commit()
     db.refresh(student)
     return student
+
+
+def update_student(db: Session, student: Student, payload: StudentCreate) -> Student:
+    student.name = payload.name
+    student.class_level = payload.class_level
+    db.commit()
+    db.refresh(student)
+    return student
+
+
+def delete_student(db: Session, student: Student) -> None:
+    db.delete(student)
+    db.commit()
