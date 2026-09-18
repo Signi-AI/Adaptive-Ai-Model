@@ -14,37 +14,37 @@ from app.services import student_service
 router = APIRouter(prefix="/students", tags=["students"])
 
 
-@router.get("", response_model=list[StudentRead])
+@router.get("/all", response_model=list[StudentRead])
 def read_all(db: Session = Depends(get_db)) -> list[StudentRead]:
     return db.query(Student).all()
 
 
-@router.get("/{student_name}", response_model=StudentRead)
-def read_student(student_name: str, db: Session = Depends(get_db)) -> StudentRead:
-    student = db.query(Student).filter(Student.name == student_name).first()
+@router.get("/{student_id}", response_model=StudentRead)
+def read_student(student_id: int, db: Session = Depends(get_db)) -> StudentRead:
+    student = db.query(Student).filter(Student.id == student_id).first()
     if student is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Student not found")
     return student
 
 
-@router.post("", response_model=StudentRead, status_code=status.HTTP_201_CREATED)
+@router.post("/create", response_model=StudentRead, status_code=status.HTTP_201_CREATED)
 def create_student(payload: StudentCreate, db: Session = Depends(get_db)) -> StudentRead:
     return student_service.create_student(db, payload)
 
 
-@router.put("/{student_name}", response_model=StudentRead)
+@router.put("/update/{student_id}", response_model=StudentRead)
 def update_student(
-    student_name: str, payload: StudentCreate, db: Session = Depends(get_db)
+    student_id: int, payload: StudentCreate, db: Session = Depends(get_db)
 ) -> StudentRead:
-    student = db.query(Student).filter(Student.name == student_name).first()
+    student = db.query(Student).filter(Student.id == student_id).first()
     if student is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Student not found")
     return student_service.update_student(db, student, payload)
 
 
-@router.delete("/{student_name}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_student(student_name: str, db: Session = Depends(get_db)) -> None:
-    student = db.query(Student).filter(Student.name == student_name).first()
+@router.delete("/delete/{student_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_student(student_id: int, db: Session = Depends(get_db)) -> None:
+    student = db.query(Student).filter(Student.id == student_id).first()
     if student is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Student not found")
     student_service.delete_student(db, student)
