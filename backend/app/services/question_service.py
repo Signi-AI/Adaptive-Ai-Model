@@ -101,9 +101,12 @@ class QuestionTemplateService:
         if template is None:
             return None
 
+
+
         # exclude_unset=True: tunachukua TU sehemu ambazo mtumiaji
         # ametuma kwa makusudi, si zote (kwa sababu Update ni ya hiari)
         update_data = data.model_dump(exclude_unset=True)
+
 
         # Geuza nested Pydantic objects kuwa dict kabla ya kuhifadhi
         if update_data.get("parameter_definitions") is not None:
@@ -111,6 +114,8 @@ class QuestionTemplateService:
                 key: (val.model_dump() if hasattr(val, "model_dump") else val)
                 for key, val in update_data["parameter_definitions"].items()
             }
+
+
         if update_data.get("answer_rule") is not None:
             rule = update_data["answer_rule"]
             update_data["answer_rule"] = rule.model_dump() if hasattr(rule, "model_dump") else rule
