@@ -1,11 +1,10 @@
 
-from unittest.mock import Base
 import uuid
 
 from sqlalchemy import Column, String, ForeignKey, Integer, JSON, DateTime, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
-
+from app.database import Base
 class GeneratedQuestion(Base):
 
     __tablename__ = "generated_questions"
