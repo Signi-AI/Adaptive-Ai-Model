@@ -13,6 +13,12 @@ lessons under it, so the frontend can render a topic's detail screen
 are nested as LessonSummary, not the full LessonRead - a detail page
 listing lessons needs titles and order, not every lesson's full body
 text pulled in upfront.
+
+TopicProgress/LessonProgress exist separately from TopicDetail again:
+"completed" is per-student, computed from LessonCompletion, not a raw
+column on Lesson - these get built explicitly in the route (see
+select_topic), not populated automatically via from_attributes like
+the other schemas here.
 """
 
 from datetime import datetime
@@ -67,3 +73,26 @@ class TopicDetail(BaseModel):
     description: str | None = None
     created_at: datetime
     lessons: list[LessonSummary] = []
+
+
+class LessonProgress(BaseModel):
+    id: int
+    title: str
+    order_index: int
+    completed: bool
+
+
+class TopicProgress(BaseModel):
+    id: int
+    subject_id: int
+    name: str
+    description: str | None = None
+    created_at: datetime
+    lessons: list[LessonProgress]
+
+
+class LessonCompletionRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    lesson_id: int
+    completed_at: datetime
