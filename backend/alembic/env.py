@@ -25,7 +25,14 @@ from app.core.database import Base  # noqa: E402
 # Import every model module here so autogenerate can see it. Every
 # model added from here on needs one line added below, or
 # `alembic revision --autogenerate` will silently skip its table.
-from app.models import learning_session, lesson, student, subject, topic  # noqa: E402,F401
+from app.models import (  # noqa: E402,F401
+    learning_session,
+    lesson,
+    lesson_completion,
+    student,
+    subject,
+    topic,
+)
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

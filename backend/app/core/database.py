@@ -16,10 +16,28 @@ from pathlib import Path
 
 from alembic import command
 from alembic.config import Config
-from sqlalchemy import create_engine
+from sqlalchemy import MetaData, create_engine, event
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
 from app.core.config import settings
+
+# SQLAlchemy's own recommended convention for deterministic constraint
+# names (https://docs.sqlalchemy.org/en/20/core/constraints.html#configuring-a-naming-convention-for-a-metadata-collection).
+# Without this, constraints (foreign keys especially) get no name at
+# all on SQLite, and Alembic's autogenerate can't reference them when
+# writing a downgrade() - the first migration that needs to drop or
+# alter one (see the lesson_id column added to learning_sessions)
+# generates a downgrade() that's guaranteed to fail on `alembic
+# downgrade`, since there's no name to give drop_constraint(). This
+# doesn't rename constraints on tables created by earlier migrations -
+# only affects DDL SQLAlchemy emits from this point forward.
+NAMING_CONVENTION = {
+    "ix": "ix_%(column_0_label)s",
+    "uq": "uq_%(table_name)s_%(column_0_name)s",
+    "ck": "ck_%(table_name)s_%(constraint_name)s",
+    "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
+    "pk": "pk_%(table_name)s",
+}
 
 
 def _ensure_sqlite_directory_exists(database_url: str) -> None:
@@ -50,6 +68,25 @@ engine = create_engine(
     connect_args={"check_same_thread": False},
 )
 
+
+@event.listens_for(engine, "connect")
+def _enable_sqlite_foreign_keys(dbapi_connection, connection_record) -> None:
+    """
+    SQLite does NOT enforce foreign key constraints by default, even
+    though ForeignKey(..., ondelete="CASCADE") is declared on a model
+    - it silently accepts a Topic with a subject_id that doesn't
+    exist unless this pragma is turned on for every connection.
+    SQLAlchemy's own relationship(cascade=...) still works fine
+    without this (it's Python-side), but this pragma is what stops
+    bad data getting in from outside the ORM (raw SQL, a bug that
+    skips the ORM layer, etc.) and is what makes ON DELETE CASCADE
+    actually happen at the database level.
+    """
+    cursor = dbapi_connection.cursor()
+    cursor.execute("PRAGMA foreign_keys=ON")
+    cursor.close()
+
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
@@ -61,7 +98,7 @@ class Base(DeclarativeBase):
     `alembic revision --autogenerate` will never see it and will
     silently skip generating a migration for its table.
     """
-    pass
+    metadata = MetaData(naming_convention=NAMING_CONVENTION)
 
 
 BACKEND_DIR = Path(__file__).resolve().parents[2]  # app/core/database.py -> app/core -> app -> backend
@@ -83,14 +120,6 @@ def init_db() -> None:
 
     Safe to call repeatedly - upgrading to a revision you're already
     at is a no-op.
-
-    NOTE: at this point in the project there are zero models (out of
-    scope for this issue), so `alembic upgrade head` applies the
-    baseline migration and produces a valid SQLite file with only
-    Alembic's own bookkeeping table (`alembic_version`) in it. That is
-    the *correct* result here, not a bug - real tables appear the
-    moment a teammate adds a model file, imports it in alembic/env.py,
-    and runs `alembic revision --autogenerate`.
     """
     alembic_cfg = Config(str(ALEMBIC_INI_PATH))
     command.upgrade(alembic_cfg, "head")
