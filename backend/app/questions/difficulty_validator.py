@@ -7,8 +7,8 @@ from typing import Any, Dict
 # si sheria kali ya kihisabati.
 _DIFFICULTY_MAGNITUDE_BOUNDS = {
     "easy": 20,
-    "medium": 200,
-    "hard": 10_000,
+    "medium": 50,
+    "hard": 80,
 }
 
 # Jibu sahihi linaruhusiwa kuwa kubwa zaidi ya parameta zenyewe
