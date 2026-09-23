@@ -1,91 +1,63 @@
-from __future__ import annotations
 
-from typing import Optional
+import uuid
+from typing import Any, Optional
 
-from backend.app.questions.answer_engine import AnswerEngine, EvaluationResult
-from backend.app.questions.generator import QuestionStore, default_store
-from backend.app.models.attempt import Attempt, AttemptStore, default_attempt_store
-from backend.app.schemas.assessment import (
-    SubmitAnswerRequest,
-    AssessmentResponse,
-    AttemptListResponse,
-)
+from sqlalchemy.orm import Session
+
+from app.models.attempt import Attempt
+from app.models.generated_question import GeneratedQuestion
+from app.questions.answer_engine import AnswerEngine, AnswerValidationError
 
 
 class AssessmentError(Exception):
-    def __init__(self, message: str, code: str = "assessment_error"):
-        super().__init__(message)
-        self.message = message
-        self.code = code
+    """Inatolewa pale jaribio la kuhakiki jibu halikuweza kukamilika (data batili au haipo)."""
 
 
-class AssessmentService:
-    def __init__(
+class AssessmentService(object):
+    """Huratibu uhakiki wa jibu la mwanafunzi na uhifadhi wa Attempt inayotokana nalo."""
+
+    def __init__(self, db: Session):
+        self.db = db
+        self._answer_engine = AnswerEngine()
+
+    def submit_answer(
         self,
-        question_store: Optional[QuestionStore] = None,
-        attempt_store: Optional[AttemptStore] = None,
-        answer_engine: Optional[AnswerEngine] = None,
-    ):
-        self.question_store = question_store or default_store
-        self.attempt_store = attempt_store or default_attempt_store
-        self.answer_engine = answer_engine or AnswerEngine()
+        generated_question_id: uuid.UUID,
+        submitted_answer: Any,
+        session_id: Optional[uuid.UUID] = None,
+    ) -> Attempt:
+        """Huhakiki jibu la mwanafunzi na kuhifadhi Attempt inayotokana nalo."""
+        generated_question = self._get_generated_question(generated_question_id)
 
-    def submit_answer(self, request: SubmitAnswerRequest) -> AssessmentResponse:
-        question = self.question_store.get(request.question_id)
-        if question is None:
-            raise AssessmentError(
-                f"Question not found: {request.question_id}",
-                code="question_not_found",
+        try:
+            result = self._answer_engine.evaluate(
+                correct_answer=generated_question.correct_answer,
+                submitted_answer=submitted_answer,
             )
+        except AnswerValidationError as exc:
+            raise AssessmentError(f"Invalid submission: {exc}") from exc
 
-        result: EvaluationResult = self.answer_engine.evaluate(
-            question,
-            request.answer,
-            absolute_tolerance=request.absolute_tolerance,
-            relative_tolerance=request.relative_tolerance,
-        )
-
-        attempt = Attempt.create(
-            question_id=request.question_id,
-            student_id=request.student_id,
-            submitted_answer=result.submitted,
-            expected_answer=result.expected,
+        attempt = Attempt(
+            generated_question_id=generated_question.id,
+            session_id=session_id,
+            submitted_answer=str(submitted_answer),
             is_correct=result.is_correct,
-            feedback=result.feedback,
-            tolerance_used=result.tolerance_used,
-            metadata={"error": result.error} if result.error else {},
         )
-        self.attempt_store.save(attempt)
+        self.db.add(attempt)
+        self.db.commit()
+        self.db.refresh(attempt)
+        return attempt
 
-        return AssessmentResponse(
-            attempt_id=attempt.id,
-            question_id=attempt.question_id,
-            student_id=attempt.student_id,
-            is_correct=attempt.is_correct,
-            expected_answer=attempt.expected_answer,
-            submitted_answer=attempt.submitted_answer,
-            feedback=attempt.feedback,
-            tolerance_used=attempt.tolerance_used,
-            error=result.error,
-            created_at=attempt.created_at,
+
+    def _get_generated_question(self, generated_question_id: uuid.UUID) -> GeneratedQuestion:
+        """Husoma GeneratedQuestion iliyohifadhiwa — HAIZALISHI mpya."""
+        generated_question = (
+            self.db.query(GeneratedQuestion)
+            .filter(GeneratedQuestion.id == generated_question_id)
+            .first()
         )
-
-    def get_attempt(self, attempt_id: str) -> Optional[Attempt]:
-        return self.attempt_store.get(attempt_id)
-
-    def list_attempts_for_student(self, student_id: str) -> AttemptListResponse:
-        items = self.attempt_store.list_by_student(student_id)
-        return AttemptListResponse(
-            attempts=[a.to_dict() for a in items],
-            count=len(items),
-        )
-
-    def list_attempts_for_question(self, question_id: str) -> AttemptListResponse:
-        items = self.attempt_store.list_by_question(question_id)
-        return AttemptListResponse(
-            attempts=[a.to_dict() for a in items],
-            count=len(items),
-        )
-
-
-default_assessment_service = AssessmentService()
+        if generated_question is None:
+            raise AssessmentError(
+                f"GeneratedQuestion with id '{generated_question_id}' was not found."
+            )
+        return generated_question

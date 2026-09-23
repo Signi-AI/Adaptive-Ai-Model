@@ -1,202 +1,98 @@
 
-
-#from __future__ import annotations
-
 import math
 import re
 from dataclasses import dataclass
-from typing import Any, Optional, Union
-
-from backend.app.questions.generator import GeneratedQuestion
+from typing import Any, Union
 
 
-@dataclass
-class EvaluationResult:
-    """Outcome of comparing a student answer to the expected answer."""
+class AnswerValidationError(Exception):
+    """Inatolewa pale jibu lililotumwa na mwanafunzi si sahihi kimuundo (invalid submission)."""
+@dataclass(frozen=True)
+
+class AnswerEvaluationResult:
+
     is_correct: bool
-    expected: Any
-    submitted: Any
-    feedback: str
-    tolerance_used: Optional[float] = None
-    error: Optional[str] = None
-
-    @property
-    def is_valid_submission(self) -> bool:
-        return self.error is None
+    expected_answer: Union[int, float]
+    submitted_answer: Union[int, float]
 
 
-_NUMBER_RE = re.compile(
-    r"""
-    ^\s*
-    [+-]?
-    (?:
-        \d+\.?\d*
-        |
-        \.\d+
-    )
-    (?:[eE][+-]?\d+)?
-    \s*$
-    """,
-    re.VERBOSE,
-)
+class AnswerEngine(object):
 
+    NUMERIC_ABS_TOLERANCE = 1e-6
+    NUMERIC_REL_TOLERANCE = 1e-6
 
-def parse_numerical(raw: Any) -> float:
-    """Convert a student submission into a float. Raises ValueError on failure."""
-    if isinstance(raw, bool):
-        raise ValueError("Boolean is not a valid numerical answer")
-    if isinstance(raw, (int, float)):
-        if math.isnan(raw) or math.isinf(raw):
-            raise ValueError("NaN / Inf are not valid answers")
-        return float(raw)
-    if isinstance(raw, str):
-        text = raw.strip().replace(",", "")
-        if not text:
-            raise ValueError("Empty answer")
-        if not _NUMBER_RE.match(text):
-            raise ValueError(f"Cannot parse as number: {raw!r}")
-        val = float(text)
-        if math.isnan(val) or math.isinf(val):
-            raise ValueError("NaN / Inf are not valid answers")
-        return val
-    raise ValueError(f"Unsupported answer type: {type(raw).__name__}")
+    # Muundo wa maandishi unaokubalika kuwa "namba kamili" (integer),
+    # ukiruhusu alama ya + au - mbele
+    _INTEGER_PATTERN = re.compile(r"^[+-]?\d+$")
 
+    def evaluate(self, correct_answer: Any, submitted_answer: Any) -> AnswerEvaluationResult:
+    
+        expected = self._normalize_numeric(correct_answer, source="stored correct_answer")
+        submitted = self._normalize_numeric(submitted_answer, source="submitted answer")
 
-def parse_exact(raw: Any) -> str:
-    """Normalise an exact (non-numeric) answer to a comparable string."""
-    if raw is None:
-        raise ValueError("Empty answer")
-    return str(raw).strip().lower()
+        is_correct = self._numbers_match(expected, submitted)
 
-
-def numbers_equal(
-    expected: float,
-    submitted: float,
-    *,
-    absolute_tolerance: float = 1e-6,
-    relative_tolerance: float = 1e-6,
-) -> bool:
-    return math.isclose(
-        expected,
-        submitted,
-        rel_tol=relative_tolerance,
-        abs_tol=absolute_tolerance,
-    )
-
-
-def exact_equal(expected: str, submitted: str) -> bool:
-    return expected == submitted
-
-
-class AnswerEngine:
-    """Evaluates a student answer against a GeneratedQuestion."""
-
-    def __init__(
-        self,
-        absolute_tolerance: float = 1e-6,
-        relative_tolerance: float = 1e-6,
-    ):
-        self.absolute_tolerance = absolute_tolerance
-        self.relative_tolerance = relative_tolerance
-
-    def expected_answer(self, question: GeneratedQuestion) -> Any:
-        if question.answer is not None:
-            return question.answer
-        raise ValueError("GeneratedQuestion has no answer field")
-
-    def evaluate(
-        self,
-        question: GeneratedQuestion,
-        student_answer: Any,
-        *,
-        absolute_tolerance: Optional[float] = None,
-        relative_tolerance: Optional[float] = None,
-    ) -> EvaluationResult:
-        expected = self.expected_answer(question)
-        abs_tol = (
-            absolute_tolerance
-            if absolute_tolerance is not None
-            else self.absolute_tolerance
-        )
-        rel_tol = (
-            relative_tolerance
-            if relative_tolerance is not None
-            else self.relative_tolerance
+        return AnswerEvaluationResult(
+            is_correct=is_correct,
+            expected_answer=expected,
+            submitted_answer=submitted,
         )
 
-        if isinstance(expected, (int, float)) and not isinstance(expected, bool):
-            return self._evaluate_numerical(
-                expected, student_answer, abs_tol, rel_tol
+    
+
+    def _normalize_numeric(self, value: Any, source: str) -> Union[int, float]:
+    
+        # bool ni subclass ya int kwenye Python (True == 1) — tunaikataa
+        # wazi hapa ili isije "ikapita" kimakosa kama namba halali.
+        if isinstance(value, bool):
+            raise AnswerValidationError(
+                f"{source} is a boolean, not a numeric value: {value!r}"
             )
-        return self._evaluate_exact(expected, student_answer)
 
-    def _evaluate_numerical(
-        self,
-        expected: Union[int, float],
-        student_answer: Any,
-        abs_tol: float,
-        rel_tol: float,
-    ) -> EvaluationResult:
+        if isinstance(value, (int, float)):
+            if isinstance(value, float) and not math.isfinite(value):
+                raise AnswerValidationError(
+                    f"{source} is not a finite number (NaN/infinity): {value}"
+                )
+            return value
+
+        if isinstance(value, str):
+            return self._normalize_string_value(value, source)
+
+        raise AnswerValidationError(
+            f"{source} has an unsupported type for numeric comparison: {type(value).__name__}"
+        )
+
+    def _normalize_string_value(self, value: str, source: str) -> Union[int, float]:
+
+        stripped = value.strip()
+        if not stripped:
+            raise AnswerValidationError(f"{source} is empty.")
+
+        if self._INTEGER_PATTERN.match(stripped):
+            return int(stripped)
+
         try:
-            submitted = parse_numerical(student_answer)
+            parsed = float(stripped)
         except ValueError as exc:
-            return EvaluationResult(
-                is_correct=False,
-                expected=expected,
-                submitted=student_answer,
-                feedback="Invalid numerical answer",
-                error=str(exc),
+            raise AnswerValidationError(
+                f"{source} '{value}' is not a valid number."
+            ) from exc
+
+        if not math.isfinite(parsed):
+            raise AnswerValidationError(
+                f"{source} '{value}' is not a finite number (NaN/infinity)."
             )
+        return parsed
 
-        expected_f = float(expected)
-        correct = numbers_equal(
-            expected_f,
-            submitted,
-            absolute_tolerance=abs_tol,
-            relative_tolerance=rel_tol,
+    def _numbers_match(self, expected: Union[int, float], submitted: Union[int, float]) -> bool:
+
+        if isinstance(expected, int) and isinstance(submitted, int):
+            return expected == submitted
+
+        return math.isclose(
+            float(expected),
+            float(submitted),
+            rel_tol=self.NUMERIC_REL_TOLERANCE,
+            abs_tol=self.NUMERIC_ABS_TOLERANCE,
         )
-        feedback = "Correct" if correct else "Incorrect"
-        return EvaluationResult(
-            is_correct=correct,
-            expected=expected,
-            submitted=submitted,
-            feedback=feedback,
-            tolerance_used=abs_tol,
-        )
-
-    def _evaluate_exact(
-        self,
-        expected: Any,
-        student_answer: Any,
-    ) -> EvaluationResult:
-        try:
-            submitted = parse_exact(student_answer)
-            expected_norm = parse_exact(expected)
-        except ValueError as exc:
-            return EvaluationResult(
-                is_correct=False,
-                expected=expected,
-                submitted=student_answer,
-                feedback="Invalid answer",
-                error=str(exc),
-            )
-
-        correct = exact_equal(expected_norm, submitted)
-        feedback = "Correct" if correct else "Incorrect"
-        return EvaluationResult(
-            is_correct=correct,
-            expected=expected,
-            submitted=submitted,
-            feedback=feedback,
-        )
-
-
-default_engine = AnswerEngine()
-
-
-def evaluate_answer(
-    question: GeneratedQuestion,
-    student_answer: Any,
-    **kwargs,
-) -> EvaluationResult:
-    return default_engine.evaluate(question, student_answer, **kwargs)
