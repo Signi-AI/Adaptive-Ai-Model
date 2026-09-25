@@ -5,3 +5,10 @@ pydantic==2.13.5
 pydantic-settings==2.15.0
 python-dotenv==1.2.3
 alembic==1.20.0
+
+# hashing pasword 
+passlib[bcrypt]
+bcrypt==4.0.1
+
+# for helping in login using jwt-token 
+python-multipart
