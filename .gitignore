@@ -1,79 +1,55 @@
-# Placeholder: Git ignore rules for the project.
+# Python virtual environment
+Ai.env/
+.venv/
+venv/
 
-#python
+# Python cache
 __pycache__/
 *.py[cod]
-*$py.class
-*.so
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
+*.pyo
+*.pyd
+
+# Test / coverage
 .pytest_cache/
+.mypy_cache/
+.ruff_cache/
 .coverage
 htmlcov/
 
-# Virtual Environment
-venv/
-ENV/
-env/
-Ai.env/
+# Environment variables / secrets
+.env
+.env.*
+*.env
 
+# Local databases / generated data
+app.db
+*.sqlite3
+*.db
+data/app.db
+local_data/
+Adaptive-Ai-Model/data/app.db
 
-# IDE
+# Node / frontend
+node_modules/
+frontend/node_modules/
+
+# Frontend build output
+dist/
+build/
+.next/
+coverage/
+
+# VS Code / editor
 .vscode/
 .idea/
-*.swp
-*.swo
-*~
-.DS_Store
 
-
-# Environment variables
-.env
-.env.local
-.env.*.local
-
-
-# Data & Models
-backend/data/raw/**
-backend/data/processed/**
-!backend/data/raw/educational_materials/
-!backend/data/raw/educational_materials/.gitkeep
-# Textbooks are local learning content, not source code. The existing sample
-# textbook remains tracked, while future additions are kept out of Git.
-backend/Books/**
-!backend/Books/.gitkeep
-
-
-*.pkl
-*.pt
-*.pth
-*.bin
-
-
-# Frontend
-frontend/node_modules/
-frontend/dist/
-frontend/.env.local
-
-# Logs
-*.log
-logs/
-
-# OS
+# OS files
 .DS_Store
 Thumbs.db
-node_modules
+Desktop.ini
+
+# Logs / temp
+*.log
+*.tmp
+tmp/
+temp/
