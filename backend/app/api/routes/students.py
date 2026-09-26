@@ -1,50 +1,63 @@
 """
-api/routes/students.py
+GET    /students/me
+PATCH  /students/me
+GET    /students/me/sessions
+DELETE /students/me/sessions/{session_id}
 """
+import uuid
 
-from fastapi import APIRouter, Depends, HTTPException
-from starlette import status
+from fastapi import APIRouter, Depends, status
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.core.database import get_db
+from app.api.deps import get_current_session_id, get_current_student, get_db
 from app.models.student import Student
-from app.schemas.student import StudentCreate, StudentRead
+from app.schemas.student import SessionPublic, StudentPublic, StudentUpdate
 from app.services import student_service
 
 router = APIRouter(prefix="/students", tags=["students"])
 
 
-@router.get("/all", response_model=list[StudentRead])
-def read_all(db: Session = Depends(get_db)) -> list[StudentRead]:
-    return db.query(Student).all()
+@router.get("/get_all")
+def read_all(db: Session = Depends(get_db)):
+    query = select(Student)
+    result = db.execute(query)
+    return result.scalars().all()
 
 
-@router.get("/{student_id}", response_model=StudentRead)
-def read_student(student_id: int, db: Session = Depends(get_db)) -> StudentRead:
-    student = db.query(Student).filter(Student.id == student_id).first()
-    if student is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Student not found")
-    return student
+@router.get("/me", response_model=StudentPublic)
+def read_own_profile(current_student: Student = Depends(get_current_student)):
+    return current_student
 
 
-@router.post("/create", response_model=StudentRead, status_code=status.HTTP_201_CREATED)
-def create_student(payload: StudentCreate, db: Session = Depends(get_db)) -> StudentRead:
-    return student_service.create_student(db, payload)
+@router.patch("/me", response_model=StudentPublic)
+def update_own_profile(
+    payload: StudentUpdate,
+    current_student: Student = Depends(get_current_student),
+    db: Session = Depends(get_db),
+):
+    return student_service.update_profile(db, current_student, payload)
 
 
-@router.put("/update/{student_id}", response_model=StudentRead)
-def update_student(
-    student_id: int, payload: StudentCreate, db: Session = Depends(get_db)
-) -> StudentRead:
-    student = db.query(Student).filter(Student.id == student_id).first()
-    if student is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Student not found")
-    return student_service.update_student(db, student, payload)
+@router.get("/me/sessions", response_model=list[SessionPublic])
+def list_own_sessions(
+    current_student: Student = Depends(get_current_student),
+    current_session_id: uuid.UUID = Depends(get_current_session_id),
+    db: Session = Depends(get_db),
+):
+    sessions = student_service.list_sessions(db, current_student.id)
+    result = []
+    for s in sessions:
+        public = SessionPublic.model_validate(s)
+        public.is_current = s.id == current_session_id
+        result.append(public)
+    return result
 
 
-@router.delete("/delete/{student_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_student(student_id: int, db: Session = Depends(get_db)) -> None:
-    student = db.query(Student).filter(Student.id == student_id).first()
-    if student is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Student not found")
-    student_service.delete_student(db, student)
+@router.delete("/me/sessions/{session_id}", status_code=status.HTTP_204_NO_CONTENT)
+def revoke_own_session(
+    session_id: uuid.UUID,
+    current_student: Student = Depends(get_current_student),
+    db: Session = Depends(get_db),
+):
+    student_service.revoke_session(db, current_student.id, session_id)

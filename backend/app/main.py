@@ -16,11 +16,11 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.router import api_router
-from app.core.config import settings
-from app.core.database import init_db
+from app.core.config import get_settings
+#from app.core.database import init_db
 
 
-@asynccontextmanager
+"""@asynccontextmanager
 async def lifespan(app: FastAPI):
     # --- Startup ---
     # Guarantee the SQLite file and every currently-registered table
@@ -28,14 +28,13 @@ async def lifespan(app: FastAPI):
     init_db()
     yield
     # --- Shutdown ---
-    # Nothing to clean up yet. SQLite needs no explicit disconnect step.
+    # Nothing to clean up yet. SQLite needs no explicit disconnect step."""
 
 
 app = FastAPI(
-    title=settings.PROJECT_NAME,
-    version=settings.VERSION,
-    debug=settings.DEBUG,
-    lifespan=lifespan,
+    title=get_settings().PROJECT_NAME,
+    version=get_settings().VERSION
+    #debug=get_settings().DEBUG
 )
 
 # Wide-open CORS for now: this is an offline, single-machine app during
