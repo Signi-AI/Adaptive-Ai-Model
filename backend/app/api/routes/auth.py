@@ -4,7 +4,10 @@ POST /auth/login
 POST /auth/refresh
 POST /auth/logout
 """
+from typing import Annotated
+
 from fastapi import APIRouter, Depends, status
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_session_id, get_current_student, get_db
@@ -25,15 +28,26 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 def register(payload: RegisterRequest, db: Session = Depends(get_db)):
     return student_service.register_student(db, payload)
 
-
 @router.post("/login", response_model=TokenResponse)
-def login(payload: LoginRequest, db: Session = Depends(get_db)):
+def login(
+    # Using Depends(LoginRequest.as_form) forces FastAPI to accept Form-Data
+    # while letting you interact with it as a clean Pydantic object!
+    credentials: Annotated[LoginRequest, Depends(LoginRequest.as_form)],
+    db: Session = Depends(get_db)
+):
     _, _, access_token, refresh_token, expires_at = student_service.authenticate_and_create_session(
-        db, payload.username, payload.password, payload.device_label
+        db, 
+        credentials.username, 
+        credentials.password, 
+        credentials.device_label
     )
+    
     return TokenResponse(
-        access_token=access_token, refresh_token=refresh_token, expires_at=expires_at
+        access_token=access_token, 
+        refresh_token=refresh_token, 
+        expires_at=expires_at
     )
+    
 
 
 @router.post("/refresh", response_model=TokenResponse)
