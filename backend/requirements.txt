@@ -10,7 +10,7 @@ python-dotenv>=1.0.1
 passlib==1.7.4
 argon2-cffi>=23.1.0
 PyJWT>=2.7.0
-python-multipart
+python-multipart>=0.0.9
 
 # --- tests ---
 pytest>=8.2.0
