@@ -1,11 +1,10 @@
 """
 POST /auth/register
 POST /auth/login
+POST /auth/token    <- OAuth2 form adapter, for Swagger's Authorize button
 POST /auth/refresh
 POST /auth/logout
 """
-from typing import Annotated
-
 from fastapi import APIRouter, Depends, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
@@ -28,26 +27,37 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 def register(payload: RegisterRequest, db: Session = Depends(get_db)):
     return student_service.register_student(db, payload)
 
+
 @router.post("/login", response_model=TokenResponse)
-def login(
-    # Using Depends(LoginRequest.as_form) forces FastAPI to accept Form-Data
-    # while letting you interact with it as a clean Pydantic object!
-    credentials: Annotated[LoginRequest, Depends(LoginRequest.as_form)],
-    db: Session = Depends(get_db)
-):
+def login(payload: LoginRequest, db: Session = Depends(get_db)):
     _, _, access_token, refresh_token, expires_at = student_service.authenticate_and_create_session(
-        db, 
-        credentials.username, 
-        credentials.password, 
-        credentials.device_label
+        db, payload.username, payload.password, payload.device_label
     )
-    
     return TokenResponse(
-        access_token=access_token, 
-        refresh_token=refresh_token, 
-        expires_at=expires_at
+        access_token=access_token, refresh_token=refresh_token, expires_at=expires_at
     )
-    
+
+
+@router.post("/token", response_model=TokenResponse)
+def login_for_swagger(
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    db: Session = Depends(get_db),
+):
+    """
+    Exists only so Swagger's "Authorize" button has a real endpoint to
+    submit its username/password form to. Calls the exact same
+    authenticate_and_create_session as /auth/login -- same password
+    check, same session creation, same errors. Real clients should keep
+    using POST /auth/login with JSON, which also lets them set a real
+    device_label; this route hard-codes one since the OAuth2 form has no
+    field for it.
+    """
+    _, _, access_token, refresh_token, expires_at = student_service.authenticate_and_create_session(
+        db, form_data.username, form_data.password, device_label="Swagger UI"
+    )
+    return TokenResponse(
+        access_token=access_token, refresh_token=refresh_token, expires_at=expires_at
+    )
 
 
 @router.post("/refresh", response_model=TokenResponse)
