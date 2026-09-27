@@ -5,12 +5,14 @@ POST /auth/token    <- OAuth2 form adapter, for Swagger's Authorize button
 POST /auth/refresh
 POST /auth/logout
 """
-from fastapi import APIRouter, Depends, status
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, Form, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_session_id, get_current_student, get_db
-from app.models.student import Student
+from app.models.student import ClassLevel, Student
 from app.schemas.student import (
     LoginRequest,
     RefreshRequest,
@@ -22,11 +24,26 @@ from app.services import student_service
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
-
 @router.post("/register", response_model=StudentPublic, status_code=status.HTTP_201_CREATED)
-def register(payload: RegisterRequest, db: Session = Depends(get_db)):
-    return student_service.register_student(db, payload)
-
+def register(
+    # 1. This grabs form_data.username and form_data.password
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()], 
+    # 2. Add your custom mandatory registration fields here as separate Form parameters
+    full_name: Annotated[str, Form()],
+    class_level: Annotated[ClassLevel, Form()],
+    db: Session = Depends(get_db)
+):
+    """
+    Registers a new student using OAuth2 form data alongside extra registration form fields.
+    """
+    # 3. Pass these clean form values into your service function
+    return student_service.register_student(
+        db=db, 
+        username=form_data.username, 
+        password=form_data.password, 
+        full_name=full_name, 
+        class_level=class_level
+    )
 
 @router.post("/login", response_model=TokenResponse)
 def login(payload: LoginRequest, db: Session = Depends(get_db)):
