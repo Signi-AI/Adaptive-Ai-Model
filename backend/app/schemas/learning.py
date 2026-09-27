@@ -22,8 +22,11 @@ the other schemas here.
 """
 
 from datetime import datetime
+import uuid
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
+
+from app.models.chat_message import ChatRole
 
 
 class SubjectRead(BaseModel):
@@ -96,3 +99,21 @@ class LessonCompletionRead(BaseModel):
 
     lesson_id: int
     completed_at: datetime
+
+
+class ChatMessageRequest(BaseModel):
+    message: str = Field(min_length=1, max_length=4000)
+
+
+class ChatMessagePublic(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    role: ChatRole
+    content: str
+    created_at: datetime
+
+
+class ChatReplyResponse(BaseModel):
+    student_message: ChatMessagePublic
+    ai_reply: ChatMessagePublic    
