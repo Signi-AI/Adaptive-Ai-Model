@@ -7,7 +7,7 @@ from alembic import context
 from app.core.config import get_settings
 from app.core.database import Base
 
-from app.models.student import Student, StudentSession
+from app.models import *
 
 # This is the Alembic Config object
 config = context.config
