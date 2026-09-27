@@ -5,33 +5,20 @@ Nothing here ever includes password_hash or refresh_token_hash — the
 issue is explicit that API responses must not leak sensitive fields, so
 those columns simply have no corresponding field in any *Public schema.
 """
-import re
 from typing import Optional
 import uuid
 from datetime import datetime
 
 from fastapi import Form
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field
 
 from app.models.student import ClassLevel, StudentStatus
-
-_USERNAME_PATTERN = re.compile(r"^[a-zA-Z0-9_]{3,32}$")
-
 
 class RegisterRequest(BaseModel):
     username: str = Field(min_length=3, max_length=32)
     full_name: str = Field(min_length=2, max_length=120)
     password: str = Field(min_length=8, max_length=128)
     class_level: ClassLevel
-
-    @field_validator("username")
-    @classmethod
-    def username_format(cls, v: str) -> str:
-        if not _USERNAME_PATTERN.match(v):
-            raise ValueError(
-                "Username must be 3-32 characters: letters, numbers, and underscores only"
-            )
-        return v
 
 class LoginRequest(BaseModel):
     username: str = Field(..., description="The user's email or identifier")
