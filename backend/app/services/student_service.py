@@ -3,6 +3,7 @@ Business logic for the Student domain. Routes stay thin (see
 api/routes/auth.py and api/routes/students.py) — this module is where
 registration, login, refresh, and profile rules actually live.
 """
+import re
 import uuid
 from datetime import datetime, timezone
 
@@ -22,8 +23,21 @@ from app.core.security import (
 from app.models.student import Student, StudentSession, StudentStatus
 from app.schemas.student import RegisterRequest, StudentUpdate
 
+_USERNAME_PATTERN = re.compile(r"^[a-zA-Z0-9_]{3,32}$")
+
+
+def _validate_registration_username(username: str) -> None:
+    """Enforce the username rule as part of the registration workflow."""
+    if not _USERNAME_PATTERN.fullmatch(username):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail="Username must be 3-32 characters: letters, numbers, and underscores only",
+        )
+
 
 def register_student(db: Session, data: RegisterRequest) -> Student:
+    _validate_registration_username(data.username)
+
     existing = db.execute(select(Student).where(func.lower(Student.username) == data.username.lower()))
     if existing.scalar_one_or_none() is not None:
         raise HTTPException(
