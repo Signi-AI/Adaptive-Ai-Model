@@ -7,6 +7,9 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.schemas.learning import (
+    ChatMessagePublic,
+    ChatMessageRequest,
+    ChatReplyResponse,
     LessonCompletionRead,
     LessonProgress,
     LessonRead,
@@ -16,6 +19,8 @@ from app.schemas.learning import (
     TopicRead,
 )
 from app.services import learning_service, session_service
+from app.api.deps import get_current_student
+from app.models.student import Student
 
 router = APIRouter(tags=["learning"])
 
@@ -47,6 +52,30 @@ def get_topic_detail(topic_id: int, db: Session = Depends(get_db)) -> TopicDetai
     if topic is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Topic not found")
     return topic
+
+
+@router.post("/session/message", response_model=ChatReplyResponse)
+def post_message(
+    payload: ChatMessageRequest,
+    current_student: Student = Depends(get_current_student),
+    db: Session = Depends(get_db),
+):
+    student_row, reply_row = learning_service.post_chat_message(
+        db, current_student.id, payload.message
+    )
+    return ChatReplyResponse(
+        student_message=ChatMessagePublic.model_validate(student_row),
+        ai_reply=ChatMessagePublic.model_validate(reply_row),
+    )
+
+
+
+@router.get("/session/messages", response_model=list[ChatMessagePublic])
+def get_messages(
+    current_student: Student = Depends(get_current_student),
+    db: Session = Depends(get_db),
+):
+    return learning_service.get_chat_history(db, current_student.id)
 
 
 @router.post("/students/{student_id}/topics/{topic_id}", response_model=TopicProgress)
