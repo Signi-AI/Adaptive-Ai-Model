@@ -6,9 +6,11 @@ issue is explicit that API responses must not leak sensitive fields, so
 those columns simply have no corresponding field in any *Public schema.
 """
 import re
+from typing import Optional
 import uuid
 from datetime import datetime
 
+from fastapi import Form
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from app.models.student import ClassLevel, StudentStatus
@@ -31,14 +33,21 @@ class RegisterRequest(BaseModel):
             )
         return v
 
-
 class LoginRequest(BaseModel):
-    username: str
-    password: str
-    # Optional friendly label the frontend can send (e.g. from a device
-    # picker in the UI) — purely for the student's own session list,
-    # never used to make a security decision.
-    device_label: str | None = Field(default=None, max_length=255)
+    username: str = Field(..., description="The user's email or identifier")
+    password: str = Field(..., description="The user's account password")
+    device_label: Optional[str] = Field(None, description="Identifier for the login device")
+
+    # This classmethod converts form data fields into your Pydantic schema
+    @classmethod
+    def as_form(
+        cls,
+        username: str = Form(...),
+        password: str = Form(...),
+        device_label: Optional[str] = Form(None)
+    ):
+        return cls(username=username, password=password, device_label=device_label)
+
 
 
 class RefreshRequest(BaseModel):
