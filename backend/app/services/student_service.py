@@ -20,7 +20,7 @@ from app.core.security import (
     refresh_token_expiry,
     verify_password,
 )
-from app.models.student import Student, StudentSession, StudentStatus
+from app.models.student import ClassLevel, Student, StudentSession, StudentStatus
 from app.schemas.student import RegisterRequest, StudentUpdate
 
 _USERNAME_PATTERN = re.compile(r"^[a-zA-Z0-9_]{3,32}$")
@@ -35,10 +35,19 @@ def _validate_registration_username(username: str) -> None:
         )
 
 
-def register_student(db: Session, data: RegisterRequest) -> Student:
-    _validate_registration_username(data.username)
+def register_student(
+    db: Session, 
+    username: str, 
+    password: str, 
+    full_name: str, 
+    class_level: ClassLevel
+) -> Student:
+    # Your critical validation logic remains perfectly intact here:
+    _validate_registration_username(username)
 
-    existing = db.execute(select(Student).where(func.lower(Student.username) == data.username.lower()))
+    existing = db.execute(
+        select(Student).where(func.lower(Student.username) == username.lower())
+    )
     if existing.scalar_one_or_none() is not None:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -46,13 +55,14 @@ def register_student(db: Session, data: RegisterRequest) -> Student:
         )
 
     student = Student(
-        username=data.username,
-        full_name=data.full_name,
-        password_hash=hash_password(data.password),
-        class_level=data.class_level,
+        username=username,
+        full_name=full_name,
+        password_hash=hash_password(password), # Hashes your individual password variable
+        class_level=class_level,
         status=StudentStatus.ACTIVE,
     )
     db.add(student)
+    
     try:
         db.commit()
     except IntegrityError:
@@ -63,8 +73,13 @@ def register_student(db: Session, data: RegisterRequest) -> Student:
             status_code=status.HTTP_409_CONFLICT,
             detail="That username is already taken",
         )
+        
     db.refresh(student)
     return student
+
+
+
+
 
 
 def _get_student_by_username(db: Session, username: str) -> Student | None:
