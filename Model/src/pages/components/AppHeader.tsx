@@ -5,7 +5,6 @@ const AppHeader: React.FC = () => {
   return (
     <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-gray-200 bg-white/95 px-4 backdrop-blur-md sm:px-6">
 
-      {/* Mobile Logo */}
       <Link
         to="/learning"
         className="flex items-center gap-2 lg:hidden"
