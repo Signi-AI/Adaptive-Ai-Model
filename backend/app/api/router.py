@@ -11,7 +11,8 @@ should never need to change again once this issue lands.
 
 from fastapi import APIRouter
 
-from app.api.routes import health, auth, learning, sessions, students
+from app.api.routes import health, auth, learning, sessions, students, teacher
+
 
 api_router = APIRouter()
 
@@ -20,3 +21,4 @@ api_router.include_router(health.router)
 api_router.include_router(students.router)
 api_router.include_router(learning.router)
 api_router.include_router(sessions.router)
+api_router.include_router(teacher.router)
