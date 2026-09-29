@@ -26,10 +26,10 @@ const Hero: React.FC = () => {
 
           {/* Heading */}
           <h1 className="text-4xl font-bold leading-tight tracking-tight text-black sm:text-5xl md:text-6xl lg:text-7xl">
-            Learn Smarter.
+            Learn Smarter
             <br />
             <span className="text-gray-400">
-              Learn Your Way.
+              Learn Your Way
             </span>
           </h1>
 

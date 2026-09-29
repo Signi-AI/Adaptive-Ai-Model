@@ -59,10 +59,12 @@ const Notifications: React.FC = () => {
     },
   ]);
 
+  // Count unread notifications
   const unreadCount = notifications.filter(
     (notification) => !notification.read
   ).length;
 
+  // Mark one notification as read
   const markAsRead = (id: number) => {
     setNotifications((current) =>
       current.map((notification) =>
@@ -73,6 +75,7 @@ const Notifications: React.FC = () => {
     );
   };
 
+  // Mark all notifications as read
   const markAllAsRead = () => {
     setNotifications((current) =>
       current.map((notification) => ({
@@ -82,6 +85,7 @@ const Notifications: React.FC = () => {
     );
   };
 
+  // Delete notification
   const deleteNotification = (id: number) => {
     setNotifications((current) =>
       current.filter((notification) => notification.id !== id)
@@ -91,14 +95,23 @@ const Notifications: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
 
-      {/* Header */}
+      {/* ================= HEADER ================= */}
       <header className="sticky top-0 z-30 border-b border-gray-200 bg-white px-8 py-6">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
 
           <div>
-            <h1 className="text-2xl font-bold text-black">
-              Notifications
-            </h1>
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl font-bold text-black">
+                Notifications
+              </h1>
+
+              {/* Unread Count Badge */}
+              {unreadCount > 0 && (
+                <span className="flex h-7 min-w-7 items-center justify-center rounded-full bg-black px-2 text-xs font-bold text-white">
+                  {unreadCount}
+                </span>
+              )}
+            </div>
 
             <p className="mt-1 text-sm text-gray-500">
               Stay updated with your learning activities
@@ -114,19 +127,27 @@ const Notifications: React.FC = () => {
               Mark All as Read
             </button>
           )}
-
         </div>
       </header>
 
-      {/* Main Content */}
+      {/* ================= MAIN CONTENT ================= */}
       <main className="space-y-8 p-8">
 
-        {/* Notification Summary */}
+        {/* ================= SUMMARY ================= */}
         <section className="rounded-2xl bg-black p-8 text-white">
 
-          <h2 className="text-2xl font-bold">
-            Your Notifications
-          </h2>
+          <div className="flex flex-wrap items-center gap-3">
+            <h2 className="text-2xl font-bold">
+              Your Notifications
+            </h2>
+
+            {/* Unread Number */}
+            {unreadCount > 0 && (
+              <span className="flex h-8 min-w-8 items-center justify-center rounded-full bg-white px-2 text-sm font-bold text-black">
+                {unreadCount}
+              </span>
+            )}
+          </div>
 
           <p className="mt-3 max-w-2xl text-sm leading-6 text-gray-300">
             Important updates about assignments, learning progress,
@@ -135,6 +156,7 @@ const Notifications: React.FC = () => {
 
           <div className="mt-7 grid grid-cols-1 gap-4 sm:grid-cols-3">
 
+            {/* Total */}
             <div className="rounded-xl bg-gray-900 p-5">
               <p className="text-sm text-gray-400">
                 Total Notifications
@@ -145,16 +167,26 @@ const Notifications: React.FC = () => {
               </p>
             </div>
 
+            {/* Unread */}
             <div className="rounded-xl bg-gray-900 p-5">
               <p className="text-sm text-gray-400">
-                Unread
+                Unread Notifications
               </p>
 
-              <p className="mt-2 text-3xl font-bold">
-                {unreadCount}
-              </p>
+              <div className="mt-2 flex items-center gap-3">
+                <p className="text-3xl font-bold">
+                  {unreadCount}
+                </p>
+
+                {unreadCount > 0 && (
+                  <span className="rounded-full bg-white px-3 py-1 text-xs font-bold text-black">
+                    New
+                  </span>
+                )}
+              </div>
             </div>
 
+            {/* Read */}
             <div className="rounded-xl bg-gray-900 p-5">
               <p className="text-sm text-gray-400">
                 Read
@@ -166,26 +198,38 @@ const Notifications: React.FC = () => {
             </div>
 
           </div>
-
         </section>
 
-        {/* Notifications List */}
+        {/* ================= NOTIFICATIONS LIST ================= */}
         <section className="rounded-2xl border border-gray-200 bg-white p-7">
 
-          <div>
-            <h2 className="text-xl font-bold text-black">
-              Recent Notifications
-            </h2>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
 
-            <p className="mt-1 text-sm text-gray-500">
-              Your latest learning and account updates.
-            </p>
+            <div>
+              <h2 className="text-xl font-bold text-black">
+                Recent Notifications
+              </h2>
+
+              <p className="mt-1 text-sm text-gray-500">
+                Your latest learning and account updates.
+              </p>
+            </div>
+
+            {/* Unread Counter */}
+            {unreadCount > 0 && (
+              <div className="rounded-lg bg-slate-300 px-4 py-2 text-sm font-semibold text-black">
+                {unreadCount} unread
+              </div>
+            )}
           </div>
 
           <div className="mt-6 space-y-4">
 
             {notifications.length === 0 ? (
+
+              /* ================= EMPTY STATE ================= */
               <div className="rounded-xl border border-gray-200 bg-gray-50 p-10 text-center">
+
                 <h3 className="text-lg font-semibold text-black">
                   No Notifications
                 </h3>
@@ -193,9 +237,13 @@ const Notifications: React.FC = () => {
                 <p className="mt-2 text-sm text-gray-500">
                   You don't have any notifications at the moment.
                 </p>
+
               </div>
+
             ) : (
+
               notifications.map((notification) => (
+
                 <div
                   key={notification.id}
                   className={`rounded-xl border p-6 transition ${
@@ -207,7 +255,7 @@ const Notifications: React.FC = () => {
 
                   <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
 
-                    {/* Notification Content */}
+                    {/* ================= CONTENT ================= */}
                     <div className="flex-1">
 
                       <div className="flex flex-wrap items-center gap-3">
@@ -216,6 +264,7 @@ const Notifications: React.FC = () => {
                           {notification.title}
                         </h3>
 
+                        {/* NEW BADGE */}
                         {!notification.read && (
                           <span className="rounded-full bg-black px-3 py-1 text-xs font-semibold text-white">
                             New
@@ -230,10 +279,12 @@ const Notifications: React.FC = () => {
 
                       <div className="mt-4 flex flex-wrap items-center gap-3">
 
+                        {/* TYPE */}
                         <span className="rounded-full bg-slate-300 px-3 py-1 text-xs font-semibold text-black">
                           {notification.type}
                         </span>
 
+                        {/* TIME */}
                         <span className="text-xs text-gray-400">
                           {notification.time}
                         </span>
@@ -242,7 +293,7 @@ const Notifications: React.FC = () => {
 
                     </div>
 
-                    {/* Actions */}
+                    {/* ================= ACTIONS ================= */}
                     <div className="flex flex-wrap gap-2">
 
                       {!notification.read && (
@@ -272,6 +323,7 @@ const Notifications: React.FC = () => {
                   </div>
 
                 </div>
+
               ))
             )}
 
@@ -279,7 +331,7 @@ const Notifications: React.FC = () => {
 
         </section>
 
-        {/* Learning Section */}
+        {/* ================= CONTINUE LEARNING ================= */}
         <section className="rounded-2xl border border-slate-300 bg-slate-300 p-7">
 
           <h2 className="text-xl font-bold text-black">

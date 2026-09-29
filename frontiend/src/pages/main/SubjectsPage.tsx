@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import StudentSidebar from "./StudentSidebar";
 
 const MySubjects: React.FC = () => {
   const subjects = [
@@ -43,6 +44,10 @@ const MySubjects: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <div>
+        <StudentSidebar/>
+      </div>
+      <div className="ml-60">
 
       {/* Header */}
       <header className="sticky top-0 z-30 border-b border-gray-200 bg-white px-8 py-6">
@@ -59,13 +64,14 @@ const MySubjects: React.FC = () => {
       <div className="space-y-8 p-8">
 
         {/* Summary */}
-        <section className="rounded-2xl bg-slate-400 p-8 text-white">
+        <section className="rounded-2xl bg-slate-300
+         p-8 text-black">
 
           <h2 className="text-2xl font-bold">
             Your Learning Subjects
           </h2>
 
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-gray-300">
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-black">
             You are currently studying 6 subjects. Continue your
             lessons and improve your progress with personalized
             learning support.
@@ -74,7 +80,7 @@ const MySubjects: React.FC = () => {
           <div className="mt-6 flex flex-wrap gap-4">
 
             <div className="rounded-xl bg-white/10 px-6 py-4">
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-black">
                 Total Subjects
               </p>
 
@@ -86,7 +92,7 @@ const MySubjects: React.FC = () => {
             </div>
 
             <div className="rounded-xl bg-white/10 px-6 py-4">
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-black">
                 Completed Lessons
               </p>
 
@@ -96,7 +102,7 @@ const MySubjects: React.FC = () => {
             </div>
 
             <div className="rounded-xl bg-white/10 px-6 py-4">
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-black">
                 Overall Progress
               </p>
 
@@ -189,7 +195,7 @@ const MySubjects: React.FC = () => {
                 {/* Button */}
                 <Link
                   to="/student/ai-tutor"
-                  className="mt-5 block rounded-xl bg-slate-200 py-3 text-center text-sm font-semibold text-white transition hover:bg-slate-300"
+                  className="mt-5 block rounded-xl bg-gray-700 py-3 text-center text-sm font-semibold text-white transition hover:bg-slate-300"
                 >
                   Continue Learning
                 </Link>
@@ -269,6 +275,7 @@ const MySubjects: React.FC = () => {
           </div>
 
         </section>
+        </div>
 
       </div>
     </div>

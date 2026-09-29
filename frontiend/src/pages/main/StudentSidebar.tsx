@@ -9,32 +9,26 @@ const StudentSidebar: React.FC = () => {
     {
       name: "Dashboard",
       path: "/student-dashboard",
-      icon: "🏠",
     },
     {
       name: "My Subjects",
       path: "/subjects",
-      icon: "📚",
     },
     {
       name: "AI Tutor",
       path: "/ai-tutor",
-      icon: "🤖",
     },
     {
       name: "Learning Materials",
       path: "/materials",
-      icon: "📖",
     },
     {
       name: "My Progress",
       path: "/progress",
-      icon: "📊",
     },
     {
       name: "Assignments",
       path: "/assignments",
-      icon: "📝",
     },
     {
       name: "Notifications",
@@ -52,9 +46,7 @@ const StudentSidebar: React.FC = () => {
           to="/student-dashboard"
           className="flex items-center gap-3"
         >
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-600 font-bold text-white">
-            AI
-          </div>
+          
 
           <div>
             <h1 className="text-xl font-bold text-gray-900">

@@ -11,17 +11,14 @@ const MobileNavigation: React.FC = () => {
     {
       name: "Learn",
       path: "/subjects",
-      icon: "📚",
     },
     {
       name: "Tasks",
       path: "/assignments",
-      icon: "📝",
     },
     {
       name: "AI",
       path: "/ai-tutor",
-      icon: "🤖",
     },
     {
       name: "Profile",
