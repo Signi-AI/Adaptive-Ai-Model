@@ -1,13 +1,13 @@
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
 
 
-class Topic(Base):
-    __tablename__ = "topics"
+class LearningObjective(Base):
+    __tablename__ = "learning_objectives"
 
     id: Mapped[int] = mapped_column(
         Integer,
@@ -15,21 +15,15 @@ class Topic(Base):
         index=True,
     )
 
-    subject_id: Mapped[int] = mapped_column(
-        ForeignKey("subjects.id"),
+    lesson_id: Mapped[int] = mapped_column(
+        ForeignKey("lessons.id"),
         nullable=False,
         index=True,
     )
 
-    name: Mapped[str] = mapped_column(
-        String(150),
-        nullable=False,
-        index=True,
-    )
-
-    description: Mapped[str | None] = mapped_column(
+    description: Mapped[str] = mapped_column(
         Text,
-        nullable=True,
+        nullable=False,
     )
 
     sequence: Mapped[int] = mapped_column(
@@ -57,13 +51,7 @@ class Topic(Base):
         nullable=False,
     )
 
-    subject = relationship(
-        "Subject",
-        back_populates="topics",
-    )
-
-    lessons = relationship(
+    lesson = relationship(
         "Lesson",
-        back_populates="topic",
-        cascade="all, delete-orphan",
+        back_populates="learning_objectives",
     )
