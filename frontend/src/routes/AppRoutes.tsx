@@ -11,12 +11,21 @@ import SubjectsPage from "../pages/main/SubjectsPage";
 import Myprogress from "../pages/main/Myprogress";
 import AssignmentPage from "../pages/main/AssignmentPage";
 import Notifications from "../pages/components/Notification";
+import Setting from "../pages/main/Setting";
+import SubjectDetailsPage from "../pages/main/SubjectDetailsPage";
+import LearningMaterialsPage from "../pages/main/LearningPage";
+import TeacherDashboard from "../pages/main/TeacherDashboard";
 
 const AppRoutes = () => {
   return (
     <div>
         <Routes>
           <Route path="/" element ={<Dashboard/>}/>
+          <Route path="/teacher" element={<TeacherDashboard/>}/>
+
+          <Route path="/materials"element={<LearningMaterialsPage/>}/>
+          <Route path="/subjects/physics" element ={<SubjectDetailsPage/>}/>
+          <Route path="/settings" element={<Setting/>}/>
           <Route path="/student-dashboard" element ={<StudentDashboard/>}/>
           <Route path="/notifications" element={<Notifications/>}/>
           <Route path="/assignments" element={<AssignmentPage/>}/>

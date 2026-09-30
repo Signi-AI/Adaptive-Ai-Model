@@ -11,7 +11,6 @@ const AppSidebar: React.FC = () => {
     {
       name: "Learn",
       path: "/subjects",
-      icon: "📚",
     },
     {
       name: "Assignments",

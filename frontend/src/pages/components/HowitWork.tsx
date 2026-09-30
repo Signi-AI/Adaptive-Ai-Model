@@ -1,12 +1,17 @@
 import React from "react";
+import heroBg from "../../assets/herobg.jpeg";
 
 const HowItWorks: React.FC = () => {
   return (
     <section
       id="how-it-works"
-      className="bg-gray-50 px-6 py-20"
+      className="relative overflow-hidden bg-cover bg-center bg-no-repeat px-6 py-20"
+      style={{ backgroundImage: `url(${heroBg})` }}
     >
-      <div className="mx-auto max-w-6xl text-center">
+      {/* Semi-transparent white overlay to keep text legible */}
+      <div className="absolute inset-0 bg-white/85 backdrop-blur-[2px]" />
+
+      <div className="relative z-10 mx-auto max-w-6xl text-center">
 
         <h2 className="text-4xl font-bold text-gray-900">
           How It Works
@@ -20,8 +25,8 @@ const HowItWorks: React.FC = () => {
         <div className="mt-12 grid gap-8 md:grid-cols-3">
 
           {/* Step 1 */}
-          <div className="rounded-2xl bg-white p-8 shadow-sm">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-purple-600 font-bold text-white">
+          <div className="rounded-2xl border border-gray-100 bg-white/90 p-8 shadow-sm backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-purple-200 hover:shadow-xl">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-purple-600 font-bold text-white shadow-md shadow-purple-600/20">
               1
             </div>
 
@@ -36,8 +41,8 @@ const HowItWorks: React.FC = () => {
           </div>
 
           {/* Step 2 */}
-          <div className="rounded-2xl bg-white p-8 shadow-sm">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-purple-600 font-bold text-white">
+          <div className="rounded-2xl border border-gray-100 bg-white/90 p-8 shadow-sm backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-purple-200 hover:shadow-xl">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-purple-600 font-bold text-white shadow-md shadow-purple-600/20">
               2
             </div>
 
@@ -52,8 +57,8 @@ const HowItWorks: React.FC = () => {
           </div>
 
           {/* Step 3 */}
-          <div className="rounded-2xl bg-white p-8 shadow-sm">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-purple-600 font-bold text-white">
+          <div className="rounded-2xl border border-gray-100 bg-white/90 p-8 shadow-sm backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-purple-200 hover:shadow-xl">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-purple-600 font-bold text-white shadow-md shadow-purple-600/20">
               3
             </div>
 

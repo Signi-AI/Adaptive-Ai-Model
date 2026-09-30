@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "autoprefixer": "^10.6.0",
+    "firebase": "^12.19.0",
     "lucide-react": "^1.46.0",
     "postcss": "^8.5.28",
     "react": "^19.2.8",
@@ -26,5 +27,9 @@
     "oxlint": "^1.81.0",
     "typescript": "~6.0.2",
     "vite": "^8.3.0"
+  },
+  "allowScripts": {
+    "@firebase/util@1.15.3": true,
+    "protobufjs@7.6.6": true
   }
 }

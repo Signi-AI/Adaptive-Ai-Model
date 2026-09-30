@@ -1,12 +1,17 @@
 import React from "react";
+import heroBg from "../../assets/herobg.jpeg";
 
 const About: React.FC = () => {
   return (
     <section
       id="about"
-      className="min-h-[500px] bg-gray-50 px-6 py-20"
+      className="relative min-h-[500px] overflow-hidden bg-cover bg-center bg-no-repeat px-6 py-20"
+      style={{ backgroundImage: `url(${heroBg})` }}
     >
-      <div className="mx-auto max-w-6xl text-center">
+      {/* Semi-transparent white overlay to keep content legible */}
+      <div className="absolute inset-0 bg-white/85 backdrop-blur-[2px]" />
+
+      <div className="relative z-10 mx-auto max-w-6xl text-center">
 
         <h2 className="mb-6 text-4xl font-bold text-gray-900">
           About LearnAI
@@ -21,7 +26,7 @@ const About: React.FC = () => {
 
         <div className="mt-12 grid gap-6 md:grid-cols-3">
 
-          <div className="rounded-xl bg-white p-6 shadow-sm">
+          <div className="rounded-2xl border border-gray-100 bg-white/90 p-6 shadow-sm backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-purple-200 hover:shadow-xl">
             <h3 className="mb-3 text-xl font-semibold text-purple-600">
               Personalized Learning
             </h3>
@@ -31,7 +36,7 @@ const About: React.FC = () => {
             </p>
           </div>
 
-          <div className="rounded-xl bg-white p-6 shadow-sm">
+          <div className="rounded-2xl border border-gray-100 bg-white/90 p-6 shadow-sm backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-purple-200 hover:shadow-xl">
             <h3 className="mb-3 text-xl font-semibold text-purple-600">
               AI Assistance
             </h3>
@@ -41,7 +46,7 @@ const About: React.FC = () => {
             </p>
           </div>
 
-          <div className="rounded-xl bg-white p-6 shadow-sm">
+          <div className="rounded-2xl border border-gray-100 bg-white/90 p-6 shadow-sm backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-purple-200 hover:shadow-xl">
             <h3 className="mb-3 text-xl font-semibold text-purple-600">
               Student Progress
             </h3>
