@@ -15,7 +15,7 @@ entirely to a later issue.
 
 from datetime import datetime
 
-from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, func
+from sqlalchemy import DateTime, Boolean,ForeignKey, Integer, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
@@ -25,18 +25,74 @@ from app.models.topic import Topic
 class Lesson(Base):
     __tablename__ = "lessons"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(
+        Integer,
+        primary_key=True,
+        index=True,
+        )
 
     topic_id: Mapped[int] = mapped_column(
-        ForeignKey("topics.id", ondelete="CASCADE"), nullable=False, index=True
+        ForeignKey("topics.id"),
+        nullable=False,
+        index=True
     )
 
-    title: Mapped[str] = mapped_column(String(200), nullable=False)
-    content: Mapped[str] = mapped_column(Text, nullable=False)
-    order_index: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    title: Mapped[str] = mapped_column(
+        String(200),
+        nullable=False,
+        )
+
+    content: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+        )
+    
+    description: Mapped[str| None] = mapped_column(
+        Text,
+        nullable=True,
+    )
+
+    sequence: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=1,
+    )
+
+    estimated_learning_time: Mapped[int | None] = mapped_column(
+        Integer,
+        nullable=True,
+    )
+    
+    active: Mapped[bool] = mapped_column(
+        Boolean,
+        default=True,
+        nullable=False,
+    )
+    
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        default=datetime.utctimetuple,
+        onupdate=datetime.utctimetuple,
+        nullable=False,
+    )
+    
+    topic = relationship(
+        "Topic",
+        back_populates="lesson",
+    )
+    
+    learning_objectives = relationship(
+        "LearningObjective",
+        back_populates= "lesson",
+        cascade="all, delete-orphan",
+    )
 
     created_at: Mapped[datetime] = mapped_column(
-        DateTime, server_default=func.now(), nullable=False
+        DateTime, 
+        server_default=func.now(), 
+        nullable=False,
     )
 
-    topic: Mapped["Topic"] = relationship(back_populates="lessons")
+    topic: Mapped["Topic"] = relationship(
+        back_populates="lessons",
+        )

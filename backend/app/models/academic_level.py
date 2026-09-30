@@ -6,23 +6,25 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.core.database import Base
 
 
-class Topic(Base):
-    __tablename__ = "topics"
+class AcademicLevel(Base):
+    __tablename__ = "academic_levels"
 
     id: Mapped[int] = mapped_column(
-        Integer,
+        Integer, 
         primary_key=True,
-        index=True,
-    )
+        index=True
+        )
 
-    subject_id: Mapped[int] = mapped_column(
-        ForeignKey("subjects.id"),
+    name: Mapped[str] = mapped_column(
+        String(50),
+        unique=True,
         nullable=False,
         index=True,
     )
 
-    name: Mapped[str] = mapped_column(
-        String(150),
+    code: Mapped[str | None] = mapped_column(
+        String(20),
+        unique=True,
         nullable=False,
         index=True,
     )
@@ -30,12 +32,14 @@ class Topic(Base):
     description: Mapped[str | None] = mapped_column(
         Text,
         nullable=True,
+        index=True,
     )
 
-    sequence: Mapped[int] = mapped_column(
-        Integer,
+    Academic_Level_id: Mapped[str | None] = mapped_column(
+        String(50),
+        ForeignKey("academic_levels.id"),
         nullable=False,
-        default=1,
+        index=True,
     )
 
     active: Mapped[bool] = mapped_column(
@@ -46,24 +50,24 @@ class Topic(Base):
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime,
-        default=datetime.utcnow,
+        default=datetime.utctimetuple,
         nullable=False,
     )
 
     updated_at: Mapped[datetime] = mapped_column(
         DateTime,
-        default=datetime.utcnow,
-        onupdate=datetime.utcnow,
+        default=datetime.utctimetuple,
+        onupdate=datetime.utctimetuple,
         nullable=False,
     )
 
-    subject = relationship(
-        "Subject",
-        back_populates="topics",
+    Academic_Level = relationship(
+        "AcademicLevel",
+        back_populates="subjects",
     )
 
-    lessons = relationship(
-        "Lesson",
-        back_populates="topic",
+    topics = relationship(
+        "Topic",
+        back_populates="subject",
         cascade="all, delete-orphan",
     )
