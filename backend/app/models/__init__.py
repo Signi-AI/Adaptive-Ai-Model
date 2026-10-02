@@ -1,4 +1,4 @@
-from app.models.student import Student, StudentSession
+from backend.app.models.user import Student, StudentSession
 from app.models.chat_message import ChatRole, ChatMessage
 
 from app.models.academic_level import AcademicLevel
