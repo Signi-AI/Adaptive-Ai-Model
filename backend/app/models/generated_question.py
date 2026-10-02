@@ -24,10 +24,36 @@ class GeneratedQuestion(Base):
         nullable=False,
         index=True,
     )
+    
+    subject_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("subjects.id", ondelete="CASCADE"),
+        nullable=False, 
+        index=True,
+    )
+    
+    topic_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("topics.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    
+    lesson_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("lessons.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    
+    learning_objective_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("learning_objectives.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
 
-    # Uhusiano na kipindi cha mwanafunzi aliyepokea swali 
-    # ondelete="SET NULL": session ikifutwa, swali lililozalishwa
-    # LIBAKI (kwa ajili ya historia/audit), tu kiungo chake kiondolewe.
+
     session_id = Column(
         UUID(as_uuid=True),
         ForeignKey("student_sessions.id", ondelete="SET NULL"),
@@ -69,7 +95,15 @@ class GeneratedQuestion(Base):
         )
 
     # Uhusiano na QuestionTemplate
-    template = relationship("QuestionTemplate", back_populates="generated_questions")
+    template = relationship(
+        "QuestionTemplate", 
+        back_populates="generated_questions"
+        )
+    
+    subject = relationship("Subject")
+    topic = relationship("Topic")
+    lesson = relationship("Lesson")
+    learning_objective = relationship("LearningObjective")
 
     def __repr__(self) -> str:  
         return (
