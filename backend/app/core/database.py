@@ -8,29 +8,25 @@ concurrent requests, which matters here specifically because many
 students may be hitting this one server at once.
 """
 from sqlalchemy import create_engine
-from sqlalchemy.orm import DeclarativeBase, sessionmaker
+from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
-from app.core.config import get_settings
+from backend.app.core.config import get_settings
 
 settings = get_settings()
 
 engine = create_engine(
     settings.database_url,
-    pool_pre_ping=True,  # detect connections the DB dropped (e.g. after a restart)
+    pool_pre_ping=True,
     echo=False,
 )
 
+
 SessionLocal = sessionmaker(
     bind=engine,
+    class_=Session,
     expire_on_commit=False,
     autoflush=False,
 )
-
-
-class Base(DeclarativeBase):
-    """Shared declarative base for every ORM model in the app."""
-    pass
-
 
 def get_db():
     """
@@ -51,3 +47,8 @@ def get_db():
         yield db
     finally:
         db.close()
+
+
+class Base(DeclarativeBase):
+    """Shared declarative base for every ORM model in the app."""
+    pass

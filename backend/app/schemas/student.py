@@ -1,18 +1,25 @@
 """
 Pydantic request/response schemas for the Student domain.
 
-Nothing here ever includes password_hash or refresh_token_hash — the
-issue is explicit that API responses must not leak sensitive fields, so
-those columns simply have no corresponding field in any *Public schema.
+Registration lives here because it's inherently student-only -- the only
+public signup path in this system, and it always creates role=STUDENT.
+Login, refresh, and tokens are shared across roles now -- see
+schemas/auth.py.
+
+Nothing here ever includes password_hash or refresh_token_hash.
 """
-from typing import Optional
+import re
 import uuid
 from datetime import datetime
 
-from fastapi import Form
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-from app.models.student import ClassLevel, StudentStatus
+from app.core.validators import role_name_from_value
+from app.models.role import AccountStatus, UserRole
+from app.models.user import ClassLevel
+
+_USERNAME_PATTERN = re.compile(r"^[a-zA-Z0-9_]{3,32}$")
+
 
 class RegisterRequest(BaseModel):
     username: str = Field(min_length=3, max_length=32)
@@ -20,32 +27,14 @@ class RegisterRequest(BaseModel):
     password: str = Field(min_length=8, max_length=128)
     class_level: ClassLevel
 
-class LoginRequest(BaseModel):
-    username: str = Field(..., description="The user's email or identifier")
-    password: str = Field(..., description="The user's account password")
-    device_label: Optional[str] = Field(None, description="Identifier for the login device")
-
-    # This classmethod converts form data fields into your Pydantic schema
+    @field_validator("username")
     @classmethod
-    def as_form(
-        cls,
-        username: str = Form(...),
-        password: str = Form(...),
-        device_label: Optional[str] = Form(None)
-    ):
-        return cls(username=username, password=password, device_label=device_label)
-
-
-
-class RefreshRequest(BaseModel):
-    refresh_token: str
-
-
-class TokenResponse(BaseModel):
-    access_token: str
-    refresh_token: str
-    token_type: str = "bearer"
-    expires_at: datetime
+    def username_format(cls, v: str) -> str:
+        if not _USERNAME_PATTERN.match(v):
+            raise ValueError(
+                "Username must be 3-32 characters: letters, numbers, and underscores only"
+            )
+        return v
 
 
 class StudentPublic(BaseModel):
@@ -54,10 +43,19 @@ class StudentPublic(BaseModel):
     id: uuid.UUID
     username: str
     full_name: str
-    class_level: ClassLevel
-    status: StudentStatus
+    # Nullable: a user who was just demoted from teacher back to student
+    # starts with no class_level, same as "erase and start over" for every
+    # other role-specific field. Normal registration always sets a real one.
+    class_level: ClassLevel | None
+    status: AccountStatus
+    role: UserRole
     created_at: datetime
     last_login_at: datetime | None
+
+    @field_validator("role", mode="before")
+    @classmethod
+    def _extract_role(cls, v):
+        return role_name_from_value(v)
 
 
 class StudentUpdate(BaseModel):
