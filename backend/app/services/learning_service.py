@@ -1,68 +1,19 @@
 """
-services/learning_service.py
+Business logic for the AI Teaching Session chat (MVP placeholder version).
 
-Read-only retrieval for the Subject -> Topic -> Lesson hierarchy. No
-create/update/delete here on purpose — curriculum content is seeded
-(scripts/seed_database.py, a separate concern), not written through
-student-facing API endpoints. A future "content management" need
-(e.g. a teacher/admin UI) is a new, explicitly-scoped issue, not a
-silent addition here.
-
-get_student() is a read-only existence check only — it exists here
-(not in student_service.py) purely to validate a student_id before
-handing back topic details in select_topic(). It does not create,
-update, or own Student in any way; that's still student_service.py's
-job.
+post_chat_message stores the student's message and immediately generates
+a placeholder AI reply -- no curriculum context, no Gemma call yet. This
+gives the frontend a real, working endpoint to build against while the
+curriculum domain and Gemma client don't exist yet. When those exist,
+only _generate_placeholder_reply needs replacing with a real call into
+an AI Teacher Service (docs Section 31) -- the storage shape stays valid.
 """
-
 import uuid
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models.lesson import Lesson
-from app.models.student import Student
-from app.models.subject import Subject
-from app.models.topic import Topic
 from app.models.chat_message import ChatMessage, ChatRole
-
-
-def get_subjects(db: Session) -> list[Subject]:
-    return db.query(Subject).order_by(Subject.name).all()
-
-
-def get_subject(db: Session, subject_id: int) -> Subject | None:
-    return db.get(Subject, subject_id)
-
-
-def get_topics_by_subject(db: Session, subject_id: int) -> list[Topic]:
-    return (
-        db.query(Topic)
-        .filter(Topic.subject_id == subject_id)
-        .order_by(Topic.id)
-        .all()
-    )
-
-
-def get_topic(db: Session, topic_id: int) -> Topic | None:
-    return db.get(Topic, topic_id)
-
-
-def get_lessons_by_topic(db: Session, topic_id: int) -> list[Lesson]:
-    return (
-        db.query(Lesson)
-        .filter(Lesson.topic_id == topic_id)
-        .order_by(Lesson.order_index)
-        .all()
-    )
-
-
-def get_lesson(db: Session, lesson_id: int) -> Lesson | None:
-    return db.get(Lesson, lesson_id)
-
-
-def get_student(db: Session, student_id: int) -> Student | None:
-    return db.get(Student, student_id)
 
 
 def _generate_placeholder_reply(student_message: str) -> str:

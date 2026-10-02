@@ -6,7 +6,7 @@ from sqlalchemy import Column, String, ForeignKey, Enum, JSON, DateTime, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
-from app.database import Base
+from app.core.database import Base
 
 
 class DifficultyLevel(str, enum.Enum):
@@ -27,7 +27,19 @@ class QuestionTemplate(Base):
         primary_key=True, 
         default=uuid.uuid4
         )
-
+    
+    question_type = Column(
+        String,
+        nullable=False,
+        index=True, 
+    )
+    
+    subject_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("subjects.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
 
 
     # Uhusiano na Topic — kila template LAZIMA iwe ya topic fulani.
@@ -39,21 +51,32 @@ class QuestionTemplate(Base):
         nullable=False,
         index=True,
     )
-
-
-    # Kiwango cha ugumu wa template hii (EASY/MEDIUM/HARD)
+    
+    lesson_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("lessons.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    
+    learning_objective_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("learning_objectives.id", ondelete="CASCADE"),
+        nullable=False, 
+        index=True,
+    )
+    
+    
     difficulty = Column(
         Enum(DifficultyLevel, name="difficulty_level"),
         nullable=False,
         index=True,
     )
 
-    # Maandishi ya swali yenye placeholders, mfano "{x} + {y} = ?"
     template_text = Column(
         String, 
         nullable=False
         )
-
 
     # Ufafanuzi wa kila parameta/placeholder iliyoko kwenye template_text
     parameter_definitions = Column(
@@ -87,15 +110,33 @@ class QuestionTemplate(Base):
 
 
 
-    # Uhusiano na Topic (upande "mmoja" wa one-to-many).
+    
+    subject = relationship(
+        "Subject",
+        back_populates="question_templates"
+    )
+
     topic = relationship(
-        "Topic", 
+        "Topic",
+        back_populates="question_templates"
+    )
+    
+    lesson = relationship(
+        "Lesson",
+        back_populates="question_templates"
+    )
+    
+    learning_objective = relationship(
+        "LearningObjective",
         back_populates="question_templates"
     )
 
     generated_questions = relationship(
-        "GeneratedQuestion", back_populates="template", cascade="all, delete-orphan"
-        )
+        "GeneratedQuestion",
+        back_populates="question_template",
+        cascade="all, delete-orphan"
+    )
+    
 
 
 

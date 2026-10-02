@@ -8,7 +8,6 @@ that changes between a school's lab server and any other machine.
 """
 from functools import lru_cache
 
-from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -17,30 +16,14 @@ class Settings(BaseSettings):
         env_file=".env", env_file_encoding="utf-8", extra="ignore"
     )
 
-    # --- App Identity ---
-    # Added to fix the AttributeError: PROJECT_NAME in app/main.py
-    PROJECT_NAME: str = "Adaptive AI Student Learning System"
-    VERSION: str = "1.0.0"
-
     # --- Database ---
-    # postgresql://user:password@host:5432/dbname
+    # postgresql+asyncpg://user:password@host:5432/dbname
     # "host" is the lab server's LAN address (or "localhost" if the API
     # and the database run on the same machine) — never a public one.
-    database_url: str  # 🛠️ Fixed: Changed to lowercase to fix AttributeError
-
-    @field_validator("database_url")
-    @classmethod
-    def normalize_database_url(cls, value: str) -> str:
-        """Use the declared synchronous psycopg2 driver for every PostgreSQL URL."""
-        if value.startswith("postgresql+psycopg2://"):
-            return value
-        if value.startswith("postgresql") and "://" in value:
-            _, remainder = value.split("://", 1)
-            return f"postgresql+psycopg2://{remainder}"
-        return value
+    database_url: str
 
     # --- JWT ---
-    jwt_secret_key: str  # 🛠️ Fixed: Changed to lowercase and confirmed correct spelling
+    jwt_secret_key: str
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
     refresh_token_expire_days: int = 14
