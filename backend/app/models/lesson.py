@@ -13,9 +13,10 @@ have to play in *some* order). Drop it if you'd rather defer ordering
 entirely to a later issue.
 """
 
+import uuid 
 from datetime import datetime
 
-from sqlalchemy import DateTime, Boolean,ForeignKey, Integer, String, Text, func
+from sqlalchemy import UUID, DateTime, Boolean,ForeignKey, Integer, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
@@ -25,9 +26,10 @@ from app.models.topic import Topic
 class Lesson(Base):
     __tablename__ = "lessons"
 
-    id: Mapped[int] = mapped_column(
-        Integer,
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
         primary_key=True,
+        default=uuid.uuid4,
         index=True,
         )
 
