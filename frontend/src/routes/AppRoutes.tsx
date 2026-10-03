@@ -15,6 +15,7 @@ import Setting from "../pages/main/Setting";
 import SubjectDetailsPage from "../pages/main/SubjectDetailsPage";
 import LearningMaterialsPage from "../pages/main/LearningPage";
 import TeacherDashboard from "../pages/main/TeacherDashboard";
+import TutorHome from "../pages/learn/TutorHome";
 
 const AppRoutes = () => {
   return (
@@ -34,6 +35,7 @@ const AppRoutes = () => {
           <Route path="/subjects" element ={<SubjectsPage/>}/>
           <Route path="/ studentlayout" element ={<StudentLayout/>}/>
           <Route path="/ai-tutor" element ={<AitutorialPage/>}/>
+          <Route path="/learn" element={<TutorHome/>}/>
           <Route path="/login" element = {<Login/>}/>
           <Route path="/register" element={<Register/>}/>
             <Route path="/homepage" element = {<HomePage/>}/>
