@@ -15,7 +15,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from backend.app.api.student_curriculum import router as student_curriculum_router
+from app.api.student_curriculum import router as student_curriculum_router
 from app.api.academic_levels import router as academic_levels_router
 from app.api.curriculum import router as curriculum_router
 from app.api.learning_objectives import router as learning_objectives_router
@@ -26,11 +26,9 @@ from app.api.routes import learning
 #from app.core.database import init_db
 from app.api.subjects import router as subjects_router
 from app.api.topics import router as topics_router
-from backend.app.core.database import SessionLocal
-from backend.app.services import role_service
-app= FastAPI(
-    title="Artificial Teacher API",
-)
+from app.core.database import SessionLocal
+from app.services import role_service
+
 
 app = FastAPI(
     title=get_settings().PROJECT_NAME,
@@ -71,6 +69,4 @@ app.include_router(curriculum_router)
 app.include_router(academic_levels_router)
 app.include_router(student_curriculum_router)
 
-@app.get("/health", tags=["health"])
-async def health():
-    return {"status": "ok"}
+

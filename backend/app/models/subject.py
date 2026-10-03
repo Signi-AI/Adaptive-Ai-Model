@@ -1,58 +1,56 @@
-"""
-models/subject.py
+from __future__ import annotations
+import uuid
+from datetime import datetime, timezone
+from typing import TYPE_CHECKING, List, Optional
 
-Top of the content hierarchy. A Subject is shared curriculum data
-(e.g. "Mathematics") — it does not belong to any one Student. This
-issue's own technical notes only specify Topic -> Subject and
-Lesson -> Topic ownership, so Subject stays standalone here.
-"""
-
-from datetime import datetime
-
-from sqlalchemy import DateTime, Integer, String, Text, func
+from sqlalchemy import UUID, DateTime, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-
 from app.core.database import Base
-from app.models.topic import Topic
+ 
+if TYPE_CHECKING:
+    from app.models.topic import Topic
 
 
 class Subject(Base):
     __tablename__ = "subjects"
 
-    id: Mapped[int] = mapped_column(
-        Integer,
+    # Primary key uses UUID (Perfect)
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
         primary_key=True,
+        default=uuid.uuid4,
         index=True
-        )
+    )
 
     name: Mapped[str] = mapped_column(
         String(120), 
         nullable=False,
         index=True
-        )
+    )
 
-
-    code: Mapped[str | None] = mapped_column(
+    code: Mapped[Optional[str]] = mapped_column(
         String(20), 
         unique=True, 
         nullable=True,
         index=True
-        )
+    )
 
-
-    description: Mapped[str | None] = mapped_column(
+    description: Mapped[Optional[str]] = mapped_column(
         Text, 
         nullable=True,
         index=True
-        )
+    )
 
+    # Standardized timezone-aware mapping across all schemas
     created_at: Mapped[datetime] = mapped_column(
-        DateTime, 
-        server_default=func.now(),
+        DateTime(timezone=True), 
+        default=lambda: datetime.now(timezone.utc),
         nullable=False
     )
 
-    topics: Mapped[list["Topic"]] = relationship(
+    # Forward relationship linking to Topic (Perfect configuration)
+    topics: Mapped[List["Topic"]] = relationship(
+        "Topic",
         back_populates="subject", 
         cascade="all, delete-orphan"
     )

@@ -1,8 +1,8 @@
 from fastapi import APIRouter
 
 from app.api.routes import admin, auth, learning, students, teacher
-from backend.app.api.routes import sessions
-from backend.app.main import health
+from app.api.routes import sessions
+from app.api.routes import health
 
 api_router = APIRouter()
 api_router.include_router(auth.router)

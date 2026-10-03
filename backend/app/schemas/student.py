@@ -24,7 +24,7 @@ _USERNAME_PATTERN = re.compile(r"^[a-zA-Z0-9_]{3,32}$")
 class RegisterRequest(BaseModel):
     username: str = Field(min_length=3, max_length=32)
     full_name: str = Field(min_length=2, max_length=120)
-    password: str = Field(min_length=8, max_length=128)
+    password: str = Field(min_length=4, max_length=128)
     class_level: ClassLevel
 
     @field_validator("username")

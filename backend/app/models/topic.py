@@ -1,21 +1,44 @@
-from datetime import datetime
+from __future__ import annotations
+import uuid
+from datetime import datetime, timezone
+from typing import List, Optional
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
+
+from typing import TYPE_CHECKING
+# ... other imports and model definition ...
+if TYPE_CHECKING:
+    from app.models.academic_level import AcademicLevel
+    from app.models.lesson import Lesson
+    from app.models.subject import Subject 
+
 
 
 class Topic(Base):
     __tablename__ = "topics"
 
-    id: Mapped[int] = mapped_column(
-        Integer,
+    # Primary Key converted to UUID
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
         primary_key=True,
+        default=uuid.uuid4,
         index=True,
     )
 
-    subject_id: Mapped[int] = mapped_column(
+    # Added Foreign Key to AcademicLevel (UUID) to handle the relationship from the previous step
+    academic_level_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("academic_levels.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+
+    # Converted Subject Foreign Key to UUID (assuming Subjects table also uses UUIDs now)
+    subject_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
         ForeignKey("subjects.id"),
         nullable=False,
         index=True,
@@ -27,7 +50,7 @@ class Topic(Base):
         index=True,
     )
 
-    description: Mapped[str | None] = mapped_column(
+    description: Mapped[Optional[str]] = mapped_column(
         Text,
         nullable=True,
     )
@@ -44,25 +67,34 @@ class Topic(Base):
         nullable=False,
     )
 
+    # Updated datetime formatting to be timezone-aware (safeguards against deprecation errors)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime,
-        default=datetime.utcnow,
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
         nullable=False,
     )
 
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime,
-        default=datetime.utcnow,
-        onupdate=datetime.utcnow,
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
         nullable=False,
     )
 
-    subject = relationship(
+    # Relationship back to AcademicLevel
+    academic_level: Mapped["AcademicLevel"] = relationship(
+        "AcademicLevel",
+        back_populates="topics",
+    )
+
+    # Relationship back to Subject
+    subject: Mapped["Subject"] = relationship(
         "Subject",
         back_populates="topics",
     )
 
-    lessons = relationship(
+    # Relationship forward to Lessons
+    lessons: Mapped[List["Lesson"]] = relationship(
         "Lesson",
         back_populates="topic",
         cascade="all, delete-orphan",

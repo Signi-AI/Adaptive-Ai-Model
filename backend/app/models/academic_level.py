@@ -1,19 +1,28 @@
-from datetime import datetime
+from __future__ import annotations
+import uuid
+from datetime import datetime, timezone
+from typing import List, Optional
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import Boolean, DateTime, ForeignKey, String, Text, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
+from typing import List, Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.models.topic import Topic
 
 
 class AcademicLevel(Base):
     __tablename__ = "academic_levels"
 
-    id: Mapped[int] = mapped_column(
-        Integer, 
+    # Primary Key converted to UUID
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
         primary_key=True,
+        default=uuid.uuid4,
         index=True
-        )
+    )
 
     name: Mapped[str] = mapped_column(
         String(50),
@@ -22,23 +31,24 @@ class AcademicLevel(Base):
         index=True,
     )
 
-    code: Mapped[str | None] = mapped_column(
+    code: Mapped[Optional[str]] = mapped_column(
         String(20),
         unique=True,
-        nullable=False,
+        nullable=True,  # Changed to True because Mapped[str | None] allows null values
         index=True,
     )
 
-    description: Mapped[str | None] = mapped_column(
+    description: Mapped[Optional[str]] = mapped_column(
         Text,
         nullable=True,
         index=True,
     )
 
-    Academic_Level_id: Mapped[str | None] = mapped_column(
-        String(50),
+    # Foreign Key converted to UUID to perfectly match the primary key 'id'
+    Academic_Level_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        UUID(as_uuid=True),
         ForeignKey("academic_levels.id"),
-        nullable=False,
+        nullable=True,  # Self-referential parents must be nullable, otherwise you can't insert the first root level
         index=True,
     )
 
@@ -48,26 +58,35 @@ class AcademicLevel(Base):
         nullable=False,
     )
 
+    # Fixed time stamp formatting to use native timezone-aware utcnow calls
     created_at: Mapped[datetime] = mapped_column(
-        DateTime,
-        default=datetime.utctimetuple,
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
         nullable=False,
     )
 
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime,
-        default=datetime.utctimetuple,
-        onupdate=datetime.utctimetuple,
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
         nullable=False,
     )
 
-    Academic_Level = relationship(
+    # Self-referential relationships configured explicitly
+    parent_level: Mapped[Optional["AcademicLevel"]] = relationship(
         "AcademicLevel",
-        back_populates="subjects",
+        remote_side=[id],
+        back_populates="child_levels"
     )
 
-    topics = relationship(
+    child_levels: Mapped[List["AcademicLevel"]] = relationship(
+        "AcademicLevel",
+        back_populates="parent_level"
+    )
+
+    # Child relationships pointing to other separate models
+    topics: Mapped[List["Topic"]] = relationship(
         "Topic",
-        back_populates="subject",
+        back_populates="academic_level",  # Make sure Topic model has: academic_level = relationship("AcademicLevel", back_populates="topics")
         cascade="all, delete-orphan",
     )
