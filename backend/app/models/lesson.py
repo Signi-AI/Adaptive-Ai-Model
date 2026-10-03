@@ -1,26 +1,15 @@
-"""
-models/lesson.py
-
-"A lesson must belong to a topic" (issue's own technical note) —
-topic_id is required, not optional.
-
-order_index is a deliberate, minimal addition beyond what the issue
-literally asked for: a plain integer teaching-order hint within a
-topic (1, 2, 3, ...). It is NOT a prerequisite graph — the issue
-explicitly says not to build those in Week 1 — it's the minimum
-needed for "give the system something meaningful to teach" (lessons
-have to play in *some* order). Drop it if you'd rather defer ordering
-entirely to a later issue.
-"""
-
+from __future__ import annotations
 import uuid 
-from datetime import datetime
+from datetime import datetime, timezone
+from typing import TYPE_CHECKING, List, Optional
 
-from sqlalchemy import UUID, DateTime, Boolean,ForeignKey, Integer, String, Text, func
+from sqlalchemy import UUID, DateTime, Boolean, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from app.core.database import Base  
 
-from app.core.database import Base
-from app.models.topic import Topic
+if TYPE_CHECKING:
+    from app.models.topic import Topic
+    from app.models.learning_objective import LearningObjective
 
 
 class Lesson(Base):
@@ -31,10 +20,12 @@ class Lesson(Base):
         primary_key=True,
         default=uuid.uuid4,
         index=True,
-        )
+    )
 
-    topic_id: Mapped[int] = mapped_column(
-        ForeignKey("topics.id"),
+    # Converted Foreign Key to UUID to match Topic.id
+    topic_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("topics.id", ondelete="CASCADE"),
         nullable=False,
         index=True
     )
@@ -42,14 +33,14 @@ class Lesson(Base):
     title: Mapped[str] = mapped_column(
         String(200),
         nullable=False,
-        )
+    )
 
     content: Mapped[str] = mapped_column(
         Text,
         nullable=False,
-        )
+    )
     
-    description: Mapped[str| None] = mapped_column(
+    description: Mapped[Optional[str]] = mapped_column(
         Text,
         nullable=True,
     )
@@ -60,7 +51,7 @@ class Lesson(Base):
         default=1,
     )
 
-    estimated_learning_time: Mapped[int | None] = mapped_column(
+    estimated_learning_time: Mapped[Optional[int]] = mapped_column(
         Integer,
         nullable=True,
     )
@@ -71,30 +62,29 @@ class Lesson(Base):
         nullable=False,
     )
     
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime,
-        default=datetime.utctimetuple,
-        onupdate=datetime.utctimetuple,
+    # Modernized timestamp handling across models
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), 
+        default=lambda: datetime.now(timezone.utc), 
         nullable=False,
     )
     
-    topic = relationship(
-        "Topic",
-        back_populates="lesson",
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
+        nullable=False,
     )
     
-    learning_objectives = relationship(
+    # Single, explicit relationship definition back to Topic
+    topic: Mapped["Topic"] = relationship(
+        "Topic",
+        back_populates="lessons",
+    )
+    
+    # Forward relationship pointing to LearningObjective
+    learning_objectives: Mapped[List["LearningObjective"]] = relationship(
         "LearningObjective",
-        back_populates= "lesson",
+        back_populates="lesson",
         cascade="all, delete-orphan",
     )
-
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime, 
-        server_default=func.now(), 
-        nullable=False,
-    )
-
-    topic: Mapped["Topic"] = relationship(
-        back_populates="lessons",
-        )
