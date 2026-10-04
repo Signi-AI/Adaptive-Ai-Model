@@ -16,6 +16,7 @@ from sqlalchemy import DateTime, ForeignKey, Integer, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
+from app.core.curriculum_ids import LessonId, id_column_type
 from app.core.database import Base
 
 
@@ -33,5 +34,7 @@ class LessonCompletion(Base):
     student_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
     )
-    lesson_id: Mapped[int] = mapped_column(ForeignKey("lessons.id"), nullable=False, index=True)
+    lesson_id: Mapped[LessonId] = mapped_column(
+        id_column_type(), ForeignKey("lessons.id"), nullable=False, index=True
+    )
     completed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow, nullable=False)
