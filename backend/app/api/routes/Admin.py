@@ -34,7 +34,7 @@ def list_users(
     current_admin: User = Depends(get_current_admin),
     db: Session = Depends(get_db),
 ):
-    return admin_service.list_users(db, role=role)
+    return admin_service.list_users(db,current_admin, role=role)
 
 
 @router.get("/users/{user_id}", response_model=UserAdminView)
@@ -43,7 +43,7 @@ def get_user(
     current_admin: User = Depends(get_current_admin),
     db: Session = Depends(get_db),
 ):
-    return admin_service.get_user(db, user_id)
+    return admin_service.get_user(db, user_id, current_admin)
 
 
 @router.get("/roles", response_model=list[RolePublic])
@@ -51,7 +51,7 @@ def list_roles(
     current_admin: User = Depends(get_current_admin),
     db: Session = Depends(get_db),
 ):
-    return role_service.list_roles(db)
+    return role_service.list_roles(db, current_admin)
 
 
 @router.patch("/users/{user_id}/role", response_model=UserAdminView)
