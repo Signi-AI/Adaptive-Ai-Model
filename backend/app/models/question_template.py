@@ -133,7 +133,7 @@ class QuestionTemplate(Base):
 
     generated_questions = relationship(
         "GeneratedQuestion",
-        back_populates="question_template",
+        back_populates="template",
         cascade="all, delete-orphan"
     )
     
