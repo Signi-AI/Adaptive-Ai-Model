@@ -11,13 +11,14 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field
 
+from app.core.curriculum_ids import TopicId
 from app.core.learning_enums import AdaptiveAction, Difficulty, ReasonCode, Trend
 
 
 class AdaptiveDecisionOut(BaseModel):
     decision_id: int | None = None          # None for previews (nothing persisted)
     action: AdaptiveAction
-    topic_id: int
+    topic_id: TopicId
     difficulty: Difficulty | None = None    # None for PROGRESS
     reason_code: ReasonCode
     reason: str
@@ -30,5 +31,5 @@ class AdaptiveDecisionOut(BaseModel):
 
 
 class AdaptiveDecideRequest(BaseModel):
-    topic_id: int
+    topic_id: TopicId
     session_id: str | None = Field(default=None, max_length=64)
