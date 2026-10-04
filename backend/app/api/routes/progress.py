@@ -15,6 +15,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_student_id
+from app.core.curriculum_ids import AcademicLevelId, SubjectId, TopicId
 from app.core.database import get_db
 from app.schemas.progress import OverallProgress, SubjectProgress, TopicProgress
 from app.services.progress_service import ProgressService
@@ -28,27 +29,32 @@ def _not_found(error: LookupError) -> HTTPException:
 
 @router.get("", response_model=OverallProgress)
 def get_my_progress(
+    academic_level_id: AcademicLevelId | None = None,
     student_id: UUID = Depends(get_current_student_id),
     db: Session = Depends(get_db),
 ):
-    return ProgressService.get_overall_progress(db, student_id)
+    """Pass ?academic_level_id= to total only that level's curriculum."""
+    return ProgressService.get_overall_progress(db, student_id, academic_level_id=academic_level_id)
 
 
 @router.get("/subjects/{subject_id}", response_model=SubjectProgress)
 def get_my_subject_progress(
-    subject_id: int,
+    subject_id: SubjectId,
+    academic_level_id: AcademicLevelId | None = None,
     student_id: UUID = Depends(get_current_student_id),
     db: Session = Depends(get_db),
 ):
     try:
-        return ProgressService.get_subject_progress(db, student_id, subject_id)
+        return ProgressService.get_subject_progress(
+            db, student_id, subject_id, academic_level_id=academic_level_id
+        )
     except LookupError as error:
         raise _not_found(error) from error
 
 
 @router.get("/topics/{topic_id}", response_model=TopicProgress)
 def get_my_topic_progress(
-    topic_id: int,
+    topic_id: TopicId,
     student_id: UUID = Depends(get_current_student_id),
     db: Session = Depends(get_db),
 ):
