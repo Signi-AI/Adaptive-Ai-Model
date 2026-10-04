@@ -6,6 +6,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field, model_validator
 
+from app.core.curriculum_ids import LearningObjectiveId, SubjectId, TopicId
 from app.core.learning_enums import MasteryStatus
 from app.services.mastery_rules import DIFFICULTY_DEFAULT, DIFFICULTY_MAX, DIFFICULTY_MIN
 
@@ -28,8 +29,8 @@ class AttemptEvidence(BaseModel):
     attempt_id: str | int | UUID
     score: float = Field(ge=0.0, le=1.0)
     is_correct: bool
-    topic_id: int | None = None
-    learning_objective_id: int | None = None
+    topic_id: TopicId | None = None
+    learning_objective_id: LearningObjectiveId | None = None
     difficulty: int = Field(default=DIFFICULTY_DEFAULT, ge=DIFFICULTY_MIN, le=DIFFICULTY_MAX)
     attempted_at: datetime | None = None
 
@@ -62,13 +63,13 @@ class LearningState(BaseModel):
 
 
 class TopicLearningState(LearningState):
-    topic_id: int
+    topic_id: TopicId
     topic_name: str
-    subject_id: int
+    subject_id: SubjectId
 
 
 class ObjectiveLearningState(LearningState):
-    learning_objective_id: int
+    learning_objective_id: LearningObjectiveId
     description: str
 
 
