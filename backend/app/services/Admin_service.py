@@ -23,7 +23,7 @@ from app.services import role_service
 from app.services.user_service import _erase_student_data, _erase_teacher_data
 
 
-def list_users(db: Session, *, role: UserRole | None = None) -> list[User]:
+def list_users(db: Session,current_admin: User,  *, role: UserRole | None = None) -> list[User]:
     query = select(User).order_by(func.lower(User.username))
     if role is not None:
         role_row = role_service.get_role_by_name(db, role)

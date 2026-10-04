@@ -33,6 +33,7 @@ from __future__ import annotations
 from collections.abc import Sequence
 from dataclasses import dataclass
 
+from app.core.curriculum_ids import TopicId
 from app.core.learning_enums import AdaptiveAction, Difficulty, ReasonCode, Trend
 from app.services import mastery_rules as mr
 
@@ -88,7 +89,7 @@ _DIFFICULTY_ORDER = (Difficulty.EASY, Difficulty.MEDIUM, Difficulty.HARD)
 class AdaptiveInput:
     """Everything the rules need, for ONE student on ONE topic."""
 
-    topic_id: int
+    topic_id: TopicId
     mastery_score: float
     attempts: int
     recent_outcomes: Sequence[float] = ()      # newest first

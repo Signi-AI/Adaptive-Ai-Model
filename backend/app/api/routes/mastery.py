@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_student_id      # see note in routes/progress.py
+from app.core.curriculum_ids import TopicId
 from app.core.database import get_db
 from app.schemas.mastery import StudentLearningState, TopicMasteryDetail
 from app.services.mastery_service import MasteryService
@@ -23,7 +24,7 @@ def get_my_mastery(
 
 @router.get("/topics/{topic_id}", response_model=TopicMasteryDetail)
 def get_my_topic_mastery(
-    topic_id: int,
+    topic_id: TopicId,
     student_id: UUID = Depends(get_current_student_id),
     db: Session = Depends(get_db),
 ):

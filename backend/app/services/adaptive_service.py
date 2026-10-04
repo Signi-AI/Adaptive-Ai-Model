@@ -31,6 +31,7 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.core.curriculum_ids import TopicId
 from app.core.learning_enums import ReasonCode, Trend
 from app.models.adaptive_decision import AdaptiveDecision
 from app.schemas.adaptive import AdaptiveDecisionOut
@@ -44,7 +45,7 @@ class AdaptiveService:
     def decide_next_action(
         db: Session,
         student_id: UUID,
-        topic_id: int,
+        topic_id: TopicId,
         session_id: str | None = None,
         *,
         persist: bool = True,
@@ -94,7 +95,7 @@ class AdaptiveService:
         )
 
     @staticmethod
-    def get_latest_decision(db: Session, student_id: UUID, topic_id: int) -> AdaptiveDecisionOut | None:
+    def get_latest_decision(db: Session, student_id: UUID, topic_id: TopicId) -> AdaptiveDecisionOut | None:
         """The most recent stored decision for this student and topic, if any."""
         row = AdaptiveService._latest_row(db, student_id, topic_id)
         if row is None:
@@ -116,7 +117,7 @@ class AdaptiveService:
 
     # ---------------------------------------------------------------- helpers
     @staticmethod
-    def _latest_row(db: Session, student_id: UUID, topic_id: int) -> AdaptiveDecision | None:
+    def _latest_row(db: Session, student_id: UUID, topic_id: TopicId) -> AdaptiveDecision | None:
         return db.execute(
             select(AdaptiveDecision)
             .where(AdaptiveDecision.student_id == student_id, AdaptiveDecision.topic_id == topic_id)
@@ -127,7 +128,7 @@ class AdaptiveService:
     @staticmethod
     def _to_out(
         result: RuleDecision,
-        topic_id: int,
+        topic_id: TopicId,
         mastery_score: float,
         attempts: int,
         session_id: str | None,

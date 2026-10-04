@@ -11,6 +11,12 @@ never erases a student's history, it just stops counting toward "how much is lef
 A topic is "studied" once the student has completed a lesson in it OR
 attempted a question on it.
 
+Academic levels: every topic belongs to one academic level, so "how much of
+Mathematics is done" only makes sense for ONE level. get_subject_progress() and
+get_overall_progress() therefore accept an optional academic_level_id. Callers
+that know the student's level should pass it; with None the totals span every
+level that has active topics.
+
 Errors: LookupError -> subject / topic / lesson does not exist (routes -> 404).
 """
 
@@ -22,6 +28,7 @@ from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from app.core.curriculum_ids import AcademicLevelId, LessonId, SubjectId, TopicId
 from app.core.learning_enums import MasteryStatus
 from app.models.lesson import Lesson
 from app.models.lesson_completion import LessonCompletion
@@ -40,7 +47,7 @@ from app.services import mastery_rules as rules
 class ProgressService:
     # ------------------------------------------------------------------ write
     @staticmethod
-    def mark_lesson_completed(db: Session, student_id: UUID, lesson_id: int, *, commit: bool = True) -> bool:
+    def mark_lesson_completed(db: Session, student_id: UUID, lesson_id: LessonId, *, commit: bool = True) -> bool:
         """
         Record that the student finished a lesson. Called by the Learning Session
         flow, never exposed to students directly. Returns True if newly recorded,
@@ -69,34 +76,42 @@ class ProgressService:
 
     # ------------------------------------------------------------------- read
     @staticmethod
-    def get_topic_progress(db: Session, student_id: UUID, topic_id: int) -> TopicProgress:
+    def get_topic_progress(db: Session, student_id: UUID, topic_id: TopicId) -> TopicProgress:
         topic = db.get(Topic, topic_id)
         if topic is None:
             raise LookupError("Topic not found")
         return ProgressService._topic_progress(db, student_id, [topic])[0]
 
     @staticmethod
-    def get_subject_progress(db: Session, student_id: UUID, subject_id: int) -> SubjectProgress:
+    def get_subject_progress(
+        db: Session,
+        student_id: UUID,
+        subject_id: SubjectId,
+        *,
+        academic_level_id: AcademicLevelId | None = None,
+    ) -> SubjectProgress:
         subject = db.get(Subject, subject_id)
         if subject is None:
             raise LookupError("Subject not found")
-        topics = db.execute(
-            select(Topic)
-            .where(Topic.subject_id == subject_id, Topic.active.is_(True))
-            .order_by(Topic.sequence, Topic.id)
-        ).scalars().all()
+        stmt = select(Topic).where(Topic.subject_id == subject_id, Topic.active.is_(True))
+        if academic_level_id is not None:
+            stmt = stmt.where(Topic.academic_level_id == academic_level_id)
+        topics = db.execute(stmt.order_by(Topic.sequence, Topic.name)).scalars().all()
         topic_progress = ProgressService._topic_progress(db, student_id, list(topics))
         summary = ProgressService._summarise(subject, topic_progress)
         return SubjectProgress(**summary.model_dump(), topics=topic_progress)
 
     @staticmethod
-    def get_overall_progress(db: Session, student_id: UUID) -> OverallProgress:
-        topics = db.execute(
-            select(Topic).where(Topic.active.is_(True)).order_by(Topic.subject_id, Topic.sequence, Topic.id)
-        ).scalars().all()
+    def get_overall_progress(
+        db: Session, student_id: UUID, *, academic_level_id: AcademicLevelId | None = None
+    ) -> OverallProgress:
+        stmt = select(Topic).where(Topic.active.is_(True))
+        if academic_level_id is not None:
+            stmt = stmt.where(Topic.academic_level_id == academic_level_id)
+        topics = db.execute(stmt.order_by(Topic.sequence, Topic.name)).scalars().all()
         topic_progress = ProgressService._topic_progress(db, student_id, list(topics))
 
-        by_subject: dict[int, list[TopicProgress]] = {}
+        by_subject: dict[SubjectId, list[TopicProgress]] = {}
         for item in topic_progress:
             by_subject.setdefault(item.subject_id, []).append(item)
 
@@ -159,6 +174,7 @@ class ProgressService:
                     topic_id=topic.id,
                     topic_name=topic.name,
                     subject_id=topic.subject_id,
+                    academic_level_id=topic.academic_level_id,
                     studied=done > 0 or attempted > 0,
                     lessons_total=total,
                     lessons_completed=done,

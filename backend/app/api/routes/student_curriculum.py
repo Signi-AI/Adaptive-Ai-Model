@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.services.curriculum_service import CurriculumService
 
+
 router = APIRouter(
     prefix="/students",
     tags=["Student Curriculum"],
@@ -21,6 +22,6 @@ def get_my_curriculum(
         return curriculum
 
     raise HTTPException(
-            status_code=404,
-            detail="Curriculum not found",
-        )
+        status_code=404,
+        detail="Curriculum not found",
+    )

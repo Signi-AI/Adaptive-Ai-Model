@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from uuid import UUID 
 
 from app.crud import curriculum
 from app.models.academic_level import AcademicLevel
@@ -17,7 +18,7 @@ class CurriculumService:
     @staticmethod
     def get_academic_level(
         db: Session,
-        academic_level_id: int,
+        academic_level_id: UUID,  
     ):
         if academic_level := curriculum.get_academic_level(
             db,
@@ -47,7 +48,7 @@ class CurriculumService:
         academic_level = AcademicLevel(
             name=name,
             code=code,
-            is_active=True,
+            active=True,
         )
 
         return curriculum.create_academic_level(
@@ -62,7 +63,7 @@ class CurriculumService:
     @staticmethod
     def get_subject(
         db: Session,
-        subject_id: int,
+        subject_id: UUID,  
     ):
         if subject := curriculum.get_subject(
             db,
@@ -72,13 +73,21 @@ class CurriculumService:
         raise ValueError("Subject not found")
 
     @staticmethod
-    def get_subjects(db: Session):
+    def get_subjects(
+        db: Session,
+        academic_level_id: UUID | None = None,  
+    ):
+        if academic_level_id is not None:
+            return CurriculumService.get_subjects_by_academic_level(
+                db,
+                academic_level_id,
+            )
         return curriculum.get_subjects(db)
 
     @staticmethod
     def get_subjects_by_academic_level(
         db: Session,
-        academic_level_id: int,
+        academic_level_id: UUID, 
     ):
         CurriculumService.get_academic_level(
             db,
@@ -96,7 +105,7 @@ class CurriculumService:
         name: str,
         code: str | None,
         description: str | None,
-        academic_level_id: int,
+        academic_level_id: UUID,  
     ):
         CurriculumService.get_academic_level(
             db,
@@ -119,7 +128,7 @@ class CurriculumService:
             code=code,
             description=description,
             academic_level_id=academic_level_id,
-            is_active=True,
+            active=True,
         )
 
         return curriculum.create_subject(
@@ -134,7 +143,7 @@ class CurriculumService:
     @staticmethod
     def get_topic(
         db: Session,
-        topic_id: int,
+        topic_id: UUID,  
     ):
         if topic := curriculum.get_topic(
             db,
@@ -146,7 +155,7 @@ class CurriculumService:
     @staticmethod
     def get_topics_by_subject(
         db: Session,
-        subject_id: int,
+        subject_id: UUID,  
     ):
         CurriculumService.get_subject(
             db,
@@ -161,12 +170,12 @@ class CurriculumService:
     @staticmethod
     def create_topic(
         db: Session,
-        subject_id: int,
+        subject_id: UUID,  
         name: str,
         description: str | None,
         sequence: int,
     ):
-        CurriculumService.get_subject(
+        subject = CurriculumService.get_subject(
             db,
             subject_id,
         )
@@ -183,11 +192,12 @@ class CurriculumService:
                 )
 
         topic = Topic(
+            academic_level_id=subject.academic_level_id,
             subject_id=subject_id,
             name=name,
             description=description,
             sequence=sequence,
-            is_active=True,
+            active=True,
         )
 
         return curriculum.create_topic(
@@ -202,7 +212,7 @@ class CurriculumService:
     @staticmethod
     def get_lesson(
         db: Session,
-        lesson_id: int,
+        lesson_id: UUID, 
     ):
         if lesson := curriculum.get_lesson(
             db,
@@ -214,7 +224,7 @@ class CurriculumService:
     @staticmethod
     def get_lessons_by_topic(
         db: Session,
-        topic_id: int,
+        topic_id: UUID,  
     ):
         CurriculumService.get_topic(
             db,
@@ -229,7 +239,7 @@ class CurriculumService:
     @staticmethod
     def create_lesson(
         db: Session,
-        topic_id: int,
+        topic_id: UUID,  
         title: str,
         description: str | None,
         content: str | None,
@@ -259,7 +269,7 @@ class CurriculumService:
             content=content,
             sequence=sequence,
             estimated_learning_time=estimated_learning_time,
-            is_active=True,
+            active=True,
         )
 
         return curriculum.create_lesson(
@@ -274,7 +284,7 @@ class CurriculumService:
     @staticmethod
     def get_learning_objective(
         db: Session,
-        objective_id: int,
+        objective_id: UUID,  
     ):
         if objective := curriculum.get_learning_objective(
             db,
@@ -286,7 +296,7 @@ class CurriculumService:
     @staticmethod
     def get_objectives_by_lesson(
         db: Session,
-        lesson_id: int,
+        lesson_id: UUID, 
     ):
         CurriculumService.get_lesson(
             db,
@@ -301,7 +311,7 @@ class CurriculumService:
     @staticmethod
     def create_learning_objective(
         db: Session,
-        lesson_id: int,
+        lesson_id: UUID,  
         description: str,
         sequence: int,
     ):
@@ -328,7 +338,7 @@ class CurriculumService:
             lesson_id=lesson_id,
             description=description,
             sequence=sequence,
-            is_active=True,
+            active=True,
         )
 
         return curriculum.create_learning_objective(

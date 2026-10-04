@@ -5,11 +5,13 @@ from typing import TYPE_CHECKING, List, Optional
 
 from sqlalchemy import UUID, DateTime, Boolean, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from app.core.database import Base  
+from app.core.database import Base
+
 
 if TYPE_CHECKING:
     from app.models.topic import Topic
     from app.models.learning_objective import LearningObjective
+    from app.models.question_template import QuestionTemplate  
 
 
 class Lesson(Base):
@@ -88,3 +90,10 @@ class Lesson(Base):
         back_populates="lesson",
         cascade="all, delete-orphan",
     )
+
+    question_templates: Mapped[List["QuestionTemplate"]] = relationship(
+        "QuestionTemplate",
+        back_populates="lesson",
+        cascade="all, delete-orphan"
+    )
+

@@ -49,6 +49,7 @@ from sqlalchemy import Enum as SAEnum
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
+from app.core.curriculum_ids import LearningObjectiveId, TopicId, id_column_type
 from app.core.database import Base
 from app.core.learning_enums import MasteryStatus
 
@@ -93,9 +94,11 @@ class Mastery(Base):
     student_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
     )
-    topic_id: Mapped[int] = mapped_column(ForeignKey("topics.id"), nullable=False, index=True)
-    learning_objective_id: Mapped[int | None] = mapped_column(
-        ForeignKey("learning_objectives.id"), nullable=True, index=True
+    topic_id: Mapped[TopicId] = mapped_column(
+        id_column_type(), ForeignKey("topics.id"), nullable=False, index=True
+    )
+    learning_objective_id: Mapped[LearningObjectiveId | None] = mapped_column(
+        id_column_type(), ForeignKey("learning_objectives.id"), nullable=True, index=True
     )
 
     mastery_score: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)

@@ -10,6 +10,7 @@ from app.core.database import Base
 from typing import List, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from app.models.subject import Subject
     from app.models.topic import Topic
 
 
@@ -82,6 +83,12 @@ class AcademicLevel(Base):
     child_levels: Mapped[List["AcademicLevel"]] = relationship(
         "AcademicLevel",
         back_populates="parent_level"
+    )
+
+    subjects: Mapped[List["Subject"]] = relationship(
+        "Subject",
+        back_populates="academic_level",
+        cascade="all, delete-orphan",
     )
 
     # Child relationships pointing to other separate models

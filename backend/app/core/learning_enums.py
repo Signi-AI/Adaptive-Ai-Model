@@ -55,3 +55,30 @@ class ReasonCode(str, Enum):
     DEVELOPING_MIXED = "DEVELOPING_MIXED"
     STRONG_NEEDS_CONFIRMATION = "STRONG_NEEDS_CONFIRMATION"
     MASTERED_CONSISTENT = "MASTERED_CONSISTENT"
+
+
+# --------------------------------------------------------------------------
+# Recommendation domain (Issue 08)
+# --------------------------------------------------------------------------
+class RecommendationType(str, Enum):
+    """What the student is being asked to do. Deliberately small."""
+
+    REVIEW = "REVIEW"        # go back to an earlier (prerequisite) topic
+    PRACTICE = "PRACTICE"    # exercises on the current topic at a given difficulty
+    CONTINUE = "CONTINUE"    # start / carry on with the topic's lessons
+    REMEDIATE = "REMEDIATE"  # struggling: re-learn the topic with guided practice
+    ADVANCE = "ADVANCE"      # topic mastered: move to the next one
+
+
+class RecommendationStatus(str, Enum):
+    PENDING = "PENDING"          # generated, the student has not acted on it yet
+    ACTIVE = "ACTIVE"            # the student has started working on it
+    COMPLETED = "COMPLETED"      # the student finished it
+    DISMISSED = "DISMISSED"      # the student chose to ignore it
+    SUPERSEDED = "SUPERSEDED"    # replaced by newer guidance (set by the system only)
+
+
+class RecommendationPriority(str, Enum):
+    HIGH = "HIGH"
+    MEDIUM = "MEDIUM"
+    LOW = "LOW"

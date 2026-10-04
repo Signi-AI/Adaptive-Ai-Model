@@ -9,11 +9,13 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.core.database import Base
 
 from typing import TYPE_CHECKING
-# ... other imports and model definition ...
+
+
 if TYPE_CHECKING:
     from app.models.academic_level import AcademicLevel
     from app.models.lesson import Lesson
     from app.models.subject import Subject 
+    from app.models.question_template import QuestionTemplate
 
 
 
@@ -99,3 +101,11 @@ class Topic(Base):
         back_populates="topic",
         cascade="all, delete-orphan",
     )
+
+        # Add this to map the reverse relationship from QuestionTemplate
+    question_templates: Mapped[List["QuestionTemplate"]] = relationship(
+        "QuestionTemplate",
+        back_populates="topic",
+        cascade="all, delete-orphan"
+    )
+

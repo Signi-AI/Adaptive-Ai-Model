@@ -81,6 +81,13 @@ def get_current_student(auth: tuple[User, UserRole] = Depends(get_current_user))
     return user
 
 
+def get_current_student_id(
+    current_student: User = Depends(get_current_student),
+) -> uuid.UUID:
+    """Return the authenticated student's ID for student-owned resources."""
+    return current_student.id
+
+
 def get_current_teacher(auth: tuple[User, UserRole] = Depends(get_current_user)) -> User:
     user, token_role = auth
     if token_role != UserRole.TEACHER:

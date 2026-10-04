@@ -15,17 +15,8 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.student_curriculum import router as student_curriculum_router
-from app.api.academic_levels import router as academic_levels_router
-from app.api.curriculum import router as curriculum_router
-from app.api.learning_objectives import router as learning_objectives_router
-from app.api.lesson import router as lesson_router
 from app.api.router import api_router
 from app.core.config import get_settings
-from app.api.routes import learning
-#from app.core.database import init_db
-from app.api.subjects import router as subjects_router
-from app.api.topics import router as topics_router
 from app.core.database import SessionLocal
 from app.services import role_service
 
@@ -61,12 +52,5 @@ async def lifespan(app: FastAPI):
     yield
 
 app.include_router(api_router)
-app.include_router(subjects_router)
-app.include_router(topics_router)
-app.include_router(lesson_router)
-app.include_router(learning_objectives_router)
-app.include_router(curriculum_router)
-app.include_router(academic_levels_router)
-app.include_router(student_curriculum_router)
 
 

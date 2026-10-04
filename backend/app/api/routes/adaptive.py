@@ -16,6 +16,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_student_id
+from app.core.curriculum_ids import TopicId
 from app.core.database import get_db
 from app.schemas.adaptive import AdaptiveDecideRequest, AdaptiveDecisionOut
 from app.services.adaptive_service import AdaptiveService
@@ -25,7 +26,7 @@ router = APIRouter(prefix="/adaptive", tags=["Adaptive Learning"])
 
 @router.get("/{topic_id}", response_model=AdaptiveDecisionOut)
 def preview_decision(
-    topic_id: int,
+    topic_id: TopicId,
     student_id: UUID = Depends(get_current_student_id),
     db: Session = Depends(get_db),
 ):

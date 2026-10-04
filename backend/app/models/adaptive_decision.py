@@ -18,6 +18,7 @@ from sqlalchemy import Enum as SAEnum
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
+from app.core.curriculum_ids import TopicId, id_column_type
 from app.core.database import Base
 from app.core.learning_enums import AdaptiveAction, Difficulty
 
@@ -34,7 +35,7 @@ class AdaptiveDecision(Base):
     student_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
-    topic_id: Mapped[int] = mapped_column(ForeignKey("topics.id"), nullable=False)
+    topic_id: Mapped[TopicId] = mapped_column(id_column_type(), ForeignKey("topics.id"), nullable=False)
     session_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
 
     action: Mapped[AdaptiveAction] = mapped_column(SAEnum(AdaptiveAction, name="adaptive_action"), nullable=False)
