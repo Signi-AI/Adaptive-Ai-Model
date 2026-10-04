@@ -31,9 +31,11 @@ from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from app.core.curriculum_ids import LearningObjectiveId, TopicId
 from app.models.learning_objective import LearningObjective 
 from app.models.lesson import Lesson
 from app.models.mastery import Mastery, MasteryHistory, MasteryStatus
+from app.models.subject import Subject
 from app.models.topic import Topic
 from app.models.user import User
 from app.schemas.mastery import (
@@ -84,7 +86,7 @@ class MasteryService:
         return state
 
     @staticmethod
-    def _resolve_target(db: Session, evidence: AttemptEvidence) -> tuple[int, int | None]:
+    def _resolve_target(db: Session, evidence: AttemptEvidence) -> tuple[TopicId, LearningObjectiveId | None]:
         """Return (topic_id, learning_objective_id), validating they belong together."""
         if evidence.learning_objective_id is not None:
             row = db.execute(
@@ -103,7 +105,9 @@ class MasteryService:
         return evidence.topic_id, None
 
     @staticmethod
-    def _get_or_create(db: Session, student_id: UUID, topic_id: int, objective_id: int | None) -> Mastery:
+    def _get_or_create(
+        db: Session, student_id: UUID, topic_id: TopicId, objective_id: LearningObjectiveId | None
+    ) -> Mastery:
         """Fetch the row locked FOR UPDATE (serialises concurrent attempts), creating it if needed."""
         stmt = select(Mastery).where(Mastery.student_id == student_id, Mastery.topic_id == topic_id)
         if objective_id is None:
@@ -170,7 +174,7 @@ class MasteryService:
 
     # ------------------------------------------------------------------- read
     @staticmethod
-    def get_topic_learning_state(db: Session, student_id: UUID, topic_id: int) -> TopicLearningState:
+    def get_topic_learning_state(db: Session, student_id: UUID, topic_id: TopicId) -> TopicLearningState:
         """The structured answer to "what is this student's current state for this topic?"."""
         topic = db.get(Topic, topic_id)
         if topic is None:
@@ -179,15 +183,16 @@ class MasteryService:
         return MasteryService._topic_state(db, topic, row)
 
     @staticmethod
-    def get_topic_mastery_detail(db: Session, student_id: UUID, topic_id: int) -> TopicMasteryDetail:
+    def get_topic_mastery_detail(db: Session, student_id: UUID, topic_id: TopicId) -> TopicMasteryDetail:
         """Topic state plus the per-learning-objective breakdown."""
         topic_state = MasteryService.get_topic_learning_state(db, student_id, topic_id)
 
         pairs = db.execute(
             select(Mastery, LearningObjective)
             .join(LearningObjective, LearningObjective.id == Mastery.learning_objective_id)
+            .join(Lesson, Lesson.id == LearningObjective.lesson_id)
             .where(Mastery.student_id == student_id, Mastery.topic_id == topic_id)
-            .order_by(LearningObjective.lesson_id, LearningObjective.sequence, LearningObjective.id)
+            .order_by(Lesson.sequence, LearningObjective.sequence, LearningObjective.description)
         ).all()
         outcomes = MasteryService._recent_outcomes(db, [m.id for m, _ in pairs])
 
@@ -207,12 +212,13 @@ class MasteryService:
         pairs = db.execute(
             select(Mastery, Topic)
             .join(Topic, Topic.id == Mastery.topic_id)
+            .join(Subject, Subject.id == Topic.subject_id)
             .where(
                 Mastery.student_id == student_id,
                 Mastery.learning_objective_id.is_(None),
                 Topic.active.is_(True),
             )
-            .order_by(Topic.subject_id, Topic.sequence, Topic.id)
+            .order_by(Subject.name, Topic.sequence, Topic.name)
         ).all()
         outcomes = MasteryService._recent_outcomes(db, [m.id for m, _ in pairs])
 
@@ -233,7 +239,7 @@ class MasteryService:
 
     # ---------------------------------------------------------------- helpers
     @staticmethod
-    def _topic_row(db: Session, student_id: UUID, topic_id: int) -> Mastery | None:
+    def _topic_row(db: Session, student_id: UUID, topic_id: TopicId) -> Mastery | None:
         return db.execute(
             select(Mastery).where(
                 Mastery.student_id == student_id,
