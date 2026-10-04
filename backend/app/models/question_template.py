@@ -6,7 +6,7 @@ from sqlalchemy import Column, String, ForeignKey, Enum, JSON, DateTime, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
-from app.database import Base
+from app.core.database import Base
 
 
 class DifficultyLevel(str, enum.Enum):
