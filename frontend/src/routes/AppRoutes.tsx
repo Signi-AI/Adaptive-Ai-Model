@@ -4,6 +4,7 @@ import Profile from "../pages/main/ProfilePage";
 import Dashboard from "../pages/main/Dashbord";
 import Register from "../pages/main/Register";
 import Login from "../pages/main/LoginPage";
+import StudentLayout from "../pages/main/Studentlayout";
 import AitutorialPage from "../pages/main/AitutorialPage";
 import Myprogress from "../pages/main/Myprogress";
 import AssignmentPage from "../pages/main/AssignmentPage";
@@ -34,7 +35,7 @@ const AppRoutes = () => {
           <Route path="progress" element ={<Myprogress/>}/>
           <Route path="/student/ai-tutor" element ={<AitutorialPage/>}/>
           <Route path="/subjects" element ={<MySubjects/>}/>
-          <Route path="/ai-tutor" element ={<AitutorialPage/>}/>
+          <Route path="/ studentlayout" element ={<StudentLayout/>}/>
           <Route path="/ai-tutor" element ={<TutorHome/>}/>
           <Route path="/learn" element={<TutorHome/>}/>
           <Route path="/login" element = {<Login/>}/>
