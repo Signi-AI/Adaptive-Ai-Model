@@ -19,9 +19,8 @@ const Login: React.FC = () => {
 
     setError("");
 
-    // Temporary navigation.
-    // Firebase email/password authentication can be added here later.
-    navigate("/student-dashboard");
+    // Redirect to TutorHome
+    navigate("/learn");
   };
 
   // Google Login
@@ -49,7 +48,8 @@ const Login: React.FC = () => {
         photo: user.photoURL,
       });
 
-      navigate("/student-dashboard");
+      // Redirect to TutorHome
+      navigate("/learn");
     } catch (error: any) {
       console.error("Google login error:", error);
 
@@ -65,7 +65,9 @@ const Login: React.FC = () => {
           break;
 
         case "auth/cancelled-popup-request":
-          setError("Another Google sign-in request is already running.");
+          setError(
+            "Another Google sign-in request is already running."
+          );
           break;
 
         case "auth/unauthorized-domain":
@@ -76,7 +78,7 @@ const Login: React.FC = () => {
 
         case "auth/api-key-not-valid":
           setError(
-            "The Firebase API key is invalid. Check your firebase.ts configuration."
+            "The Firebase API key is invalid. Check your Firebase configuration."
           );
           break;
 
@@ -94,7 +96,8 @@ const Login: React.FC = () => {
 
         default:
           setError(
-            error?.message || "Google sign-in failed. Please try again."
+            error?.message ||
+              "Google sign-in failed. Please try again."
           );
       }
     } finally {
@@ -113,7 +116,6 @@ const Login: React.FC = () => {
       {/* Login container */}
       <div className="relative z-10 mx-auto flex min-h-[90vh] max-w-md items-center justify-center">
         <div className="w-full rounded-3xl border border-gray-100 bg-white/95 p-8 shadow-xl backdrop-blur-md">
-
           {/* Logo and heading */}
           <div className="mb-8 text-center">
             <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center overflow-hidden rounded-full ring-4 ring-purple-100 shadow-md">
@@ -222,7 +224,6 @@ const Login: React.FC = () => {
 
           {/* Email login form */}
           <form onSubmit={handleLogin} className="space-y-4">
-
             {/* Username / Email */}
             <div>
               <label
@@ -270,7 +271,9 @@ const Login: React.FC = () => {
 
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
+                  onClick={() =>
+                    setShowPassword(!showPassword)
+                  }
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-gray-500 transition hover:text-purple-600"
                 >
                   {showPassword ? "Hide" : "Show"}
