@@ -15,7 +15,7 @@ const AppSidebar: React.FC = () => {
     {
       name: "Assignments",
       path: "/assignments",
-      icon: "📝",
+      icon: "📝", 
     },
     {
       name: "AI Tutor",
