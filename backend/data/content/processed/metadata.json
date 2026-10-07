@@ -1,0 +1,28 @@
+[
+  {
+    "id": "academic_communication__academic_communication_form_5_wazaelimu.com",
+    "title": "academic_communication_form_5_wazaelimu.com",
+    "subject": "Academic_Communication",
+    "format": "pdf",
+    "pages": 80,
+    "chars": 157423,
+    "needs_ocr": false,
+    "topic_count": 0,
+    "topics": [],
+    "source": "Google Drive",
+    "path": "backend/data/content/raw/Academic_Communication/academic_communication_form_5_wazaelimu.com.pdf"
+  },
+  {
+    "id": "academic_communication__academic_communication_student_s_book_six_by_mr._moris",
+    "title": "academic_communication_student_s_book_six_by_mr._moris",
+    "subject": "Academic_Communication",
+    "format": "pdf",
+    "pages": 97,
+    "chars": 187196,
+    "needs_ocr": false,
+    "topic_count": 0,
+    "topics": [],
+    "source": "Google Drive",
+    "path": "backend/data/content/raw/Academic_Communication/academic_communication_student_s_book_six_by_mr._moris.pdf"
+  }
+]

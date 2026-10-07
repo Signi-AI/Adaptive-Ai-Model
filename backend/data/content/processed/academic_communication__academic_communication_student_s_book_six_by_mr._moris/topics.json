@@ -1,0 +1,62 @@
+[
+  {
+    "title": "Chapter Two MITC i Tritt 12",
+    "level": 1,
+    "start_page": 4,
+    "end_page": 8
+  },
+  {
+    "title": "Chapter One",
+    "level": 1,
+    "start_page": 8,
+    "end_page": 19
+  },
+  {
+    "title": "Chapter Two",
+    "level": 1,
+    "start_page": 19,
+    "end_page": 30
+  },
+  {
+    "title": "Chapter Three",
+    "level": 1,
+    "start_page": 30,
+    "end_page": 39
+  },
+  {
+    "title": "Chapter Four",
+    "level": 1,
+    "start_page": 39,
+    "end_page": 49
+  },
+  {
+    "title": "Chapter Five",
+    "level": 1,
+    "start_page": 49,
+    "end_page": 56
+  },
+  {
+    "title": "Chapter Six",
+    "level": 1,
+    "start_page": 56,
+    "end_page": 64
+  },
+  {
+    "title": "Chapter Seven",
+    "level": 1,
+    "start_page": 64,
+    "end_page": 74
+  },
+  {
+    "title": "Chapter Eight",
+    "level": 1,
+    "start_page": 74,
+    "end_page": 86
+  },
+  {
+    "title": "Chapter Nine",
+    "level": 1,
+    "start_page": 86,
+    "end_page": 97
+  }
+]
