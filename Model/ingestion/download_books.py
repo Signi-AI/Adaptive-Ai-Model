@@ -1,13 +1,22 @@
+﻿import re
 import shutil
 import zipfile
 from pathlib import Path
 
 import gdown
 
-from common import RAW, list_pdfs, norm
+from ingest_utils import RAW, list_pdfs, norm
 
-LINKS_FILE = Path(__file__).resolve().with_name("book_links.txt")
+LINKS_FILE = Path(__file__).parent / "book_links.txt"
 TMP = Path("backend/data/content/_download")
+
+
+def file_id(link):
+    match = re.search(r"/d/([\w-]+)", link) or re.search(r"id=([\w-]+)", link)
+    if not match:
+        raise ValueError(f"Link haina ID: {link}")
+    return match.group(1)
+
 
 LINKS = [
     line.strip()
@@ -21,7 +30,7 @@ existing = {p.name for p in list_pdfs()}
 for link in LINKS:
     TMP.mkdir(parents=True, exist_ok=True)
     zip_path = TMP / "books.zip"
-    gdown.download(link, str(zip_path), fuzzy=True, quiet=False)
+    gdown.download(f"https://drive.google.com/uc?id={file_id(link)}", str(zip_path), quiet=False)
 
     with zipfile.ZipFile(zip_path) as z:
         z.extractall(TMP / "unzipped")

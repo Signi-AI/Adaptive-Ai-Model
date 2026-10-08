@@ -1,4 +1,4 @@
-import re
+﻿import re
 from pathlib import Path
 
 RAW = Path("backend/data/content/raw")
@@ -21,3 +21,4 @@ def doc_dir(pdf):
     path = OUT / doc_id(pdf)
     path.mkdir(parents=True, exist_ok=True)
     return path
+

@@ -1,4 +1,4 @@
-import json
+﻿import json
 import sys
 from pathlib import Path
 
@@ -6,7 +6,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from Model.ingestion.common import OUT, doc_dir, doc_id, list_pdfs
+from ingest_utils import OUT, doc_dir, doc_id, list_pdfs
 
 records = []
 
@@ -31,7 +31,7 @@ for pdf in list_pdfs():
         "chars": chars,
         "needs_ocr": chars / max(len(pages), 1) < 50,
         "topic_count": len(topics),
-        "topics": [t["title"] for t in topics],
+        "topics": topics,
         "source": "Google Drive",
         "path": pdf.as_posix(),
     })
@@ -41,3 +41,4 @@ OUT.mkdir(parents=True, exist_ok=True)
     json.dumps(records, ensure_ascii=False, indent=2), encoding="utf-8"
 )
 print(f"metadata.json imeundwa: {len(records)} vitabu")
+
