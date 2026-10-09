@@ -3,7 +3,7 @@ from fastapi import APIRouter
 from app.api.routes import (
     academic_levels,
     adaptive,
-    admin,
+    Admin,
     auth,
     curriculum,
     health,
@@ -26,7 +26,7 @@ api_router.include_router(auth.router)
 api_router.include_router(students.router)
 api_router.include_router(learning.router)
 api_router.include_router(teacher.router)
-api_router.include_router(admin.router)
+api_router.include_router(Admin.router)
 api_router.include_router(health.router)
 api_router.include_router(sessions.router)
 api_router.include_router(academic_levels.router)
