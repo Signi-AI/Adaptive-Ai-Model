@@ -21,9 +21,23 @@ from app.core.database import SessionLocal
 from app.services import role_service
 
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Guarantees the three roles exist the moment the app starts serving
+    # requests -- ordinary student self-registration (and every login)
+    # depends on a role row existing, so this cannot wait on someone
+    # remembering to run a seed script first. Idempotent; safe on every
+    # restart. The actual admin IDENTITY (real credentials) is deliberately
+    # a separate, explicit step -- see scripts/seed_admin.py.
+    with SessionLocal() as db:
+        role_service.ensure_core_roles_exist(db)
+    yield
+
+
 app = FastAPI(
     title=get_settings().PROJECT_NAME,
-    version=get_settings().VERSION
+    version=get_settings().VERSION,
+    lifespan=lifespan,
     #debug=get_settings().DEBUG
 )
 
@@ -38,18 +52,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    # Guarantees the three roles exist the moment the app starts serving
-    # requests -- ordinary student self-registration (and every login)
-    # depends on a role row existing, so this cannot wait on someone
-    # remembering to run a seed script first. Idempotent; safe on every
-    # restart. The actual admin IDENTITY (real credentials) is deliberately
-    # a separate, explicit step -- see scripts/seed_admin.py.
-    with SessionLocal() as db:
-        role_service.ensure_core_roles_exist(db)
-    yield
 
 app.include_router(api_router)
 
