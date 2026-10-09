@@ -23,7 +23,7 @@ from app.api.deps import get_current_admin, get_db
 from app.models.role import UserRole
 from app.models.user import User
 from app.schemas.admin import RoleAssignment, RolePublic, UserAdminView
-from app.services import admin_service, role_service
+from app.services import Admin_service, role_service
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -34,7 +34,7 @@ def list_users(
     current_admin: User = Depends(get_current_admin),
     db: Session = Depends(get_db),
 ):
-    return admin_service.list_users(db,current_admin, role=role)
+    return Admin_service.list_users(db,current_admin, role=role)
 
 
 @router.get("/users/{user_id}", response_model=UserAdminView)
@@ -43,7 +43,7 @@ def get_user(
     current_admin: User = Depends(get_current_admin),
     db: Session = Depends(get_db),
 ):
-    return admin_service.get_user(db, user_id, current_admin)
+    return Admin_service.get_user(db, user_id, current_admin)
 
 
 @router.get("/roles", response_model=list[RolePublic])
@@ -61,4 +61,4 @@ def change_user_role(
     current_admin: User = Depends(get_current_admin),
     db: Session = Depends(get_db),
 ):
-    return admin_service.set_user_role(db, target_user_id=user_id, new_role=payload.role)
+    return Admin_service.set_user_role(db, target_user_id=user_id, new_role=payload.role)
