@@ -6,7 +6,7 @@ topic, and (if the session reached that far) lesson as lightweight
 summaries rather than making the frontend chase more lookups just to
 show "you were on Lesson 2 of Linear Equations (Mathematics)."
 """
-
+import uuid
 from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict
@@ -15,29 +15,29 @@ from pydantic import BaseModel, ConfigDict
 class SessionSubjectSummary(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    id: int
+    id: uuid.UUID
     name: str
 
 
 class SessionTopicSummary(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    id: int
+    id: uuid.UUID
     name: str
 
 
 class SessionLessonSummary(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    id: int
+    id: uuid.UUID
     title: str
 
 
 class LastSessionRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    id: int
-    student_id: int
+    id: uuid.UUID
+    student_id: uuid.UUID
     subject: SessionSubjectSummary
     topic: SessionTopicSummary
     lesson: SessionLessonSummary | None = None

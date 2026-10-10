@@ -1,4 +1,5 @@
 import os
+from functools import lru_cache
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # 1. CALCULATE POTENTIAL ROOT LOCATIONS
@@ -29,5 +30,7 @@ class Settings(BaseSettings):
         extra="ignore"
     )
 
+@lru_cache
 def get_settings() -> Settings:
     return Settings()
+
