@@ -53,3 +53,18 @@ Desktop.ini
 *.tmp
 tmp/
 temp/
+
+# Vitabu na text kubwa
+backend/data/content/raw/
+backend/data/content/_download/
+backend/data/content/processed/*/pages.jsonl
+
+# Link za Drive
+backend/data/content/book_links.txt
+
+# Python
+__pycache__/
+*.pyc
+.env/
+.venv/
+model/ingestion/book_links.txt
