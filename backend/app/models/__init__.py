@@ -1,5 +1,6 @@
 from app.models.academic_level import AcademicLevel
 from app.models.adaptive_decision import AdaptiveDecision
+from app.models.attempt import Attempt
 from app.models.chat_message import ChatMessage, ChatRole
 from app.models.generated_question import GeneratedQuestion
 from app.models.learning_objective import LearningObjective
@@ -32,6 +33,7 @@ __all__ = [
     "AccountStatus",
     "AssignmentStatus",
     "AdaptiveDecision",
+    "Attempt",
     "ChatMessage",
     "ChatRole",
     "ClassLevel",
