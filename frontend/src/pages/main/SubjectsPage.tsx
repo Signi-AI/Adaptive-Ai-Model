@@ -4,8 +4,6 @@ import { Menu } from "lucide-react";
 
 import { useStudentLayout } from "./Studentlayout";
 
-<<<<<<< HEAD
-=======
 interface ProgressCircleProps {
   progress: number;
   size?: number;
@@ -66,7 +64,6 @@ const ProgressCircle: React.FC<ProgressCircleProps> = ({
   );
 };
 
->>>>>>> 6d22643 (student frontend development)
 const MySubjects: React.FC = () => {
   const { openMenu } = useStudentLayout();
 
@@ -116,37 +113,6 @@ const MySubjects: React.FC = () => {
   ];
 
   return (
-<<<<<<< HEAD
-    <div className="min-h-screen bg-gray-50">
-      <div>
-        <StudentSidebar/>
-      </div>
-      <div className="ml-60">
-
-      {/* Header */}
-      <header className="sticky top-0 z-30 border-b border-gray-200 bg-white px-8 py-6">
-        <h1 className="text-2xl font-bold text-gray-900">
-          My Subjects
-        </h1>
-
-        <p className="mt-1 text-sm text-gray-500">
-          View your subjects and continue your learning
-        </p>
-      </header>
-
-      {/* Main Content */}
-      <div className="space-y-8 p-8">
-
-        {/* Summary */}
-        <section className="rounded-2xl bg-slate-300
-         p-8 text-black">
-
-          <h2 className="text-2xl font-bold">
-            Your Learning Subjects
-          </h2>
-
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-black">
-=======
     <div className="min-h-full bg-slate-50">
       {/* HEADER */}
       <header className="sticky top-0 z-10 border-b border-slate-200 bg-white/95 px-4 py-4 backdrop-blur-xl sm:px-6 lg:px-8">
@@ -181,153 +147,11 @@ const MySubjects: React.FC = () => {
           </h2>
 
           <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-700">
->>>>>>> 6d22643 (student frontend development)
             You are currently studying 6 subjects. Continue your
             lessons and improve your progress with personalized
             learning support.
           </p>
 
-<<<<<<< HEAD
-          <div className="mt-6 flex flex-wrap gap-4">
-
-            <div className="rounded-xl bg-white/10 px-6 py-4">
-              <p className="text-xs text-black">
-                Total Subjects
-              </p>
-
-              <p className="mt-1 text-2xl font-bold">
-                6
-              </p>
-            </div>
-            <div>
-            </div>
-
-            <div className="rounded-xl bg-white/10 px-6 py-4">
-              <p className="text-xs text-black">
-                Completed Lessons
-              </p>
-
-              <p className="mt-1 text-2xl font-bold">
-                24
-              </p>
-            </div>
-
-            <div className="rounded-xl bg-white/10 px-6 py-4">
-              <p className="text-xs text-black">
-                Overall Progress
-              </p>
-
-              <p className="mt-1 text-2xl font-bold">
-                68%
-              </p>
-            </div>
-
-          </div>
-
-        </section>
-
-        {/* Subjects */}
-        <section>
-
-          <div className="mb-5">
-            <h2 className="text-xl font-bold text-gray-900">
-              Your Subjects
-            </h2>
-
-            <p className="mt-1 text-sm text-gray-500">
-              Select a subject to continue learning.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-
-            {subjects.map((subject) => (
-              <div
-                key={subject.name}
-                className="rounded-2xl border border-gray-200 bg-white p-6 transition hover:-translate-y-1 hover:border-slate-400 hover:shadow-lg"
-              >
-
-                {/* Subject Header */}
-                <div className="flex items-start justify-between gap-4">
-
-                  <div>
-                    <h3 className="text-lg font-bold text-gray-900">
-                      {subject.name}
-                    </h3>
-
-                    <p className="mt-2 text-sm leading-5 text-gray-500">
-                      {subject.description}
-                    </p>
-                  </div>
-
-                  <span className="whitespace-nowrap rounded-full bg-purple-100 px-3 py-1 text-xs font-semibold text-slate-400">
-                    Form 2
-                  </span>
-
-                </div>
-
-                {/* Progress */}
-                <div className="mt-6">
-
-                  <div className="mb-2 flex items-center justify-between">
-                    <span className="text-xs text-gray-500">
-                      Progress
-                    </span>
-
-                    <span className="text-sm font-semibold text-gray-900">
-                      {subject.progress}%
-                    </span>
-                  </div>
-
-                  <div className="h-2.5 overflow-hidden rounded-full bg-gray-200">
-                    <div
-                      className="h-full rounded-full bg-black"
-                      style={{
-                        width: `${subject.progress}%`,
-                      }}
-                    />
-                  </div>
-
-                </div>
-
-                {/* Current Topic */}
-                <div className="mt-6 rounded-xl bg-gray-50 p-4">
-
-                  <p className="text-xs font-medium text-gray-500">
-                    Current Topic
-                  </p>
-
-                  <p className="mt-1 text-sm font-semibold text-gray-900">
-                    {subject.topic}
-                  </p>
-
-                </div>
-
-                {/* Button */}
-                <Link
-                  to="/student/ai-tutor"
-                  className="mt-5 block rounded-xl bg-gray-700 py-3 text-center text-sm font-semibold text-white transition hover:bg-slate-300"
-                >
-                  Continue Learning
-                </Link>
-
-              </div>
-            ))}
-
-          </div>
-
-        </section>
-
-        {/* Recommended Learning */}
-        <section className="rounded-2xl border border-gray-200 bg-white p-7">
-
-          <div>
-            <h2 className="text-xl font-bold text-gray-900">
-              Recommended for You
-            </h2>
-
-            <p className="mt-1 text-sm text-gray-500">
-=======
           <div className="mt-6 grid grid-cols-1 gap-3 sm:flex sm:flex-wrap sm:gap-4">
             <div className="rounded-xl bg-white/50 px-5 py-4 sm:px-6">
               <p className="text-xs font-medium text-slate-600">
@@ -446,71 +270,11 @@ const MySubjects: React.FC = () => {
             </h2>
 
             <p className="mt-1 text-sm text-slate-500">
->>>>>>> 6d22643 (student frontend development)
               Continue with topics that need more practice.
             </p>
           </div>
 
           <div className="mt-6 grid grid-cols-1 gap-5 md:grid-cols-2">
-<<<<<<< HEAD
-
-            {/* Mathematics Recommendation */}
-            <div className="rounded-xl border border-gray-200 p-5">
-
-              <p className="text-sm font-semibold text-slate-200">
-                Mathematics
-              </p>
-
-              <h3 className="mt-2 font-bold text-gray-900">
-                Introduction to Equations
-              </h3>
-
-              <p className="mt-2 text-sm text-gray-500">
-                Continue practicing equations and improve your
-                understanding step by step.
-              </p>
-
-              <Link
-                to="/student/ai-tutor"
-                className="mt-4 inline-block text-sm font-semibold text-purple-100 hover:text-purple-100"
-              >
-                Start Practice
-              </Link>
-
-            </div>
-
-            {/* Biology Recommendation */}
-            <div className="rounded-xl border border-gray-200 p-5">
-
-              <p className="text-sm font-semibold text-slate-300">
-                Biology
-              </p>
-
-              <h3 className="mt-2 font-bold text-gray-400">
-                Human Body Systems
-              </h3>
-
-              <p className="mt-2 text-sm text-gray-500">
-                Review the major human body systems and test your
-                understanding with practice questions.
-              </p>
-
-              <Link
-                to="/student/ai-tutor"
-                className="mt-4 inline-block text-sm font-semibold text-blue-200 hover:text-blue-200"
-              >
-                Start Practice
-              </Link>
-
-            </div>
-
-          </div>
-
-        </section>
-        </div>
-
-      </div>
-=======
             {/* MATHEMATICS */}
             <div className="rounded-xl border border-slate-200 p-5 transition hover:border-blue-200 hover:bg-blue-50/20">
               <div className="flex items-center justify-between gap-4">
@@ -577,7 +341,6 @@ const MySubjects: React.FC = () => {
           </div>
         </section>
       </main>
->>>>>>> 6d22643 (student frontend development)
     </div>
   );
 };

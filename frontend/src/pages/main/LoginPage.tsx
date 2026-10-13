@@ -19,14 +19,8 @@ const Login: React.FC = () => {
 
     setError("");
 
-<<<<<<< HEAD
-    // Temporary navigation.
-    // Firebase email/password authentication can be added here later.
-    navigate("/student-dashboard");
-=======
     // Redirect directly to TutorHome
     navigate("/tutorhome");
->>>>>>> 6d22643 (student frontend development)
   };
 
   // Google Login
@@ -54,12 +48,8 @@ const Login: React.FC = () => {
         photo: user.photoURL,
       });
 
-<<<<<<< HEAD
-      navigate("/student-dashboard");
-=======
       // Redirect directly to TutorHome
       navigate("/tutorhome");
->>>>>>> 6d22643 (student frontend development)
     } catch (error: any) {
       console.error("Google login error:", error);
 
