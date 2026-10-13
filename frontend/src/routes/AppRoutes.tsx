@@ -1,21 +1,25 @@
 import { Route, Routes } from "react-router-dom";
+
 import HomePage from "../pages/main/HomePage";
 import Profile from "../pages/main/ProfilePage";
 import Dashboard from "../pages/main/Dashbord";
 import Register from "../pages/main/Register";
 import Login from "../pages/main/LoginPage";
-import StudentDashboard from "../pages/main/StudentDashboard";
+
 import StudentLayout from "../pages/main/Studentlayout";
+
 import AitutorialPage from "../pages/main/AitutorialPage";
-import SubjectsPage from "../pages/main/SubjectsPage";
 import Myprogress from "../pages/main/Myprogress";
 import AssignmentPage from "../pages/main/AssignmentPage";
 import Notifications from "../pages/components/Notification";
 import Setting from "../pages/main/Setting";
 import SubjectDetailsPage from "../pages/main/SubjectDetailsPage";
-import LearningMaterialsPage from "../pages/main/LearningPage";
 import TeacherDashboard from "../pages/main/TeacherDashboard";
 import TutorHome from "../pages/learn/TutorHome";
+
+import TutorHome from "../pages/learn/TutorHome";
+import MySubjects from "../pages/main/SubjectsPage";
+import StudentDashboard from "../pages/main/StudentDashboard";
 
 const AppRoutes = () => {
   return (
