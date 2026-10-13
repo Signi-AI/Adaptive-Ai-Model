@@ -119,7 +119,6 @@ const AppRoutes = () => {
           element={<Setting />}
         />
 
-        {/* PROFILE */}
         <Route
           path="/profile"
           element={<Profile />}
