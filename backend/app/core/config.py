@@ -22,14 +22,16 @@ class Settings(BaseSettings):
 
     refresh_token_expire_days: int = 14
     access_token_expire_minutes: int = 30 
-    # 2. PROVIDE AN ARRAY OF FALLBACKS
+
+        # 2. PROVIDE AN ARRAY OF FALLBACKS
     model_config = SettingsConfigDict(
         # Pydantic checks these in order; the first file found wins!
         env_file=[_root_option, _backend_option],
         env_file_encoding="utf-8",
-        extra="ignore"
+        extra="ignore",
+        env_name_case_insensitive=True  # <-- ADD THIS EXACT LINE
     )
-
+        
 @lru_cache
 def get_settings() -> Settings:
     return Settings()
