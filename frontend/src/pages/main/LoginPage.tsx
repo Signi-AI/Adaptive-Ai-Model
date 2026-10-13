@@ -19,8 +19,8 @@ const Login: React.FC = () => {
 
     setError("");
 
-    // Redirect to TutorHome
-    navigate("/learn");
+    // Redirect directly to TutorHome
+    navigate("/tutorhome");
   };
 
   // Google Login
@@ -48,8 +48,8 @@ const Login: React.FC = () => {
         photo: user.photoURL,
       });
 
-      // Redirect to TutorHome
-      navigate("/learn");
+      // Redirect directly to TutorHome
+      navigate("/tutorhome");
     } catch (error: any) {
       console.error("Google login error:", error);
 

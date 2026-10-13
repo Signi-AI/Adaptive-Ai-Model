@@ -8,13 +8,15 @@ import {
   CheckCircle2,
   Edit3,
   Flame,
+  Menu,
   Sparkles,
   Target,
   TrendingUp,
   X,
 } from "lucide-react";
+
 import logo from "../../assets/logo.jpeg";
-import StudentSidebar from "./StudentSidebar";
+import { useStudentLayout } from "./Studentlayout";
 
 interface Student {
   name: string;
@@ -98,13 +100,18 @@ const CircularProgress: React.FC<CircularProgressProps> = ({
   const safeValue = Math.min(100, Math.max(0, value));
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
+
   const offset =
-    circumference - (safeValue / 100) * circumference;
+    circumference -
+    (safeValue / 100) * circumference;
 
   return (
     <div
       className="relative flex items-center justify-center"
-      style={{ width: size, height: size }}
+      style={{
+        width: size,
+        height: size,
+      }}
     >
       <svg
         width={size}
@@ -154,13 +161,17 @@ const CircularProgress: React.FC<CircularProgressProps> = ({
 const Profile: React.FC = () => {
   const navigate = useNavigate();
 
+  const { openMenu } = useStudentLayout();
+
   const [student] = useState<Student>(() => {
     try {
       const saved = localStorage.getItem(
         "student_profile_data"
       );
 
-      return saved ? JSON.parse(saved) : INITIAL_STUDENT;
+      return saved
+        ? JSON.parse(saved)
+        : INITIAL_STUDENT;
     } catch {
       return INITIAL_STUDENT;
     }
@@ -169,24 +180,30 @@ const Profile: React.FC = () => {
   const [profileImage] = useState<string>(() => {
     try {
       return (
-        localStorage.getItem("student_profile_image") || ""
+        localStorage.getItem(
+          "student_profile_image"
+        ) || ""
       );
     } catch {
       return "";
     }
   });
 
-  const [subjects, setSubjects] = useState<Subject[]>(() => {
-    try {
-      const saved = localStorage.getItem(
-        "student_subjects_data"
-      );
+  const [subjects, setSubjects] =
+    useState<Subject[]>(() => {
+      try {
+        const saved =
+          localStorage.getItem(
+            "student_subjects_data"
+          );
 
-      return saved ? JSON.parse(saved) : INITIAL_SUBJECTS;
-    } catch {
-      return INITIAL_SUBJECTS;
-    }
-  });
+        return saved
+          ? JSON.parse(saved)
+          : INITIAL_SUBJECTS;
+      } catch {
+        return INITIAL_SUBJECTS;
+      }
+    });
 
   const [selectedSubject, setSelectedSubject] =
     useState<Subject | null>(null);
@@ -194,10 +211,11 @@ const Profile: React.FC = () => {
   const [isUpdatingSubject, setIsUpdatingSubject] =
     useState(false);
 
-  const [editSubjectData, setEditSubjectData] = useState({
-    progress: 0,
-    topicsCompleted: 0,
-  });
+  const [editSubjectData, setEditSubjectData] =
+    useState({
+      progress: 0,
+      topicsCompleted: 0,
+    });
 
   useEffect(() => {
     localStorage.setItem(
@@ -210,23 +228,28 @@ const Profile: React.FC = () => {
     if (!subjects.length) return 0;
 
     const total = subjects.reduce(
-      (sum, subject) => sum + subject.progress,
+      (sum, subject) =>
+        sum + subject.progress,
       0
     );
 
-    return Math.round(total / subjects.length);
+    return Math.round(
+      total / subjects.length
+    );
   }, [subjects]);
 
   const totalTopicsDone = useMemo(() => {
     return subjects.reduce(
-      (sum, subject) => sum + subject.topicsCompleted,
+      (sum, subject) =>
+        sum + subject.topicsCompleted,
       0
     );
   }, [subjects]);
 
   const totalTopics = useMemo(() => {
     return subjects.reduce(
-      (sum, subject) => sum + subject.totalTopics,
+      (sum, subject) =>
+        sum + subject.totalTopics,
       0
     );
   }, [subjects]);
@@ -234,14 +257,18 @@ const Profile: React.FC = () => {
   const lowestSubject = useMemo(() => {
     if (!subjects.length) return null;
 
-    return subjects.reduce((lowest, subject) =>
-      subject.progress < lowest.progress
-        ? subject
-        : lowest
+    return subjects.reduce(
+      (lowest, subject) =>
+        subject.progress <
+        lowest.progress
+          ? subject
+          : lowest
     );
   }, [subjects]);
 
-  const getStatusBadge = (progress: number) => {
+  const getStatusBadge = (
+    progress: number
+  ) => {
     if (progress >= 80) {
       return {
         label: "Mastered",
@@ -286,12 +313,15 @@ const Profile: React.FC = () => {
     }
   };
 
-  const handleOpenSubjectEdit = (subject: Subject) => {
+  const handleOpenSubjectEdit = (
+    subject: Subject
+  ) => {
     setSelectedSubject(subject);
 
     setEditSubjectData({
       progress: subject.progress,
-      topicsCompleted: subject.topicsCompleted,
+      topicsCompleted:
+        subject.topicsCompleted,
     });
 
     setIsUpdatingSubject(true);
@@ -312,13 +342,16 @@ const Profile: React.FC = () => {
       selectedSubject.totalTopics,
       Math.max(
         0,
-        Number(editSubjectData.topicsCompleted) || 0
+        Number(
+          editSubjectData.topicsCompleted
+        ) || 0
       )
     );
 
     setSubjects((currentSubjects) =>
       currentSubjects.map((subject) =>
-        subject.id === selectedSubject.id
+        subject.id ===
+        selectedSubject.id
           ? {
               ...subject,
               progress,
@@ -332,40 +365,71 @@ const Profile: React.FC = () => {
     setSelectedSubject(null);
   };
 
-  return (
-    <div className="min-h-screen bg-slate-50">
-      <StudentSidebar />
+  const closeEditModal = () => {
+    setIsUpdatingSubject(false);
+    setSelectedSubject(null);
+  };
 
-      <main className="ml-60 min-h-screen">
-        <div className="mx-auto max-w-7xl px-6 py-8">
+  return (
+    <div className="min-h-full bg-slate-50">
+      <main className="min-h-full">
+        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
 
           {/* Header */}
-          <div className="mb-8 flex items-center justify-between">
-            <div>
-              <p className="mb-1 text-sm font-medium text-blue-600">
-                Student Learning
-              </p>
+          <div className="mb-8 flex items-start justify-between gap-4">
+            <div className="flex items-start gap-3">
+              {/* Mobile Menu */}
+              <button
+                type="button"
+                onClick={openMenu}
+                className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:bg-slate-50 md:hidden"
+                aria-label="Open menu"
+              >
+                <Menu size={20} />
+              </button>
 
-              <h1 className="text-3xl font-bold text-slate-800">
-                My Progress
-              </h1>
+              <div>
+                <p className="mb-1 text-sm font-medium text-blue-600">
+                  Student Learning
+                </p>
 
-              <p className="mt-1 text-sm text-slate-500">
-                Track your learning progress and academic performance.
-              </p>
+                <h1 className="text-2xl font-bold text-slate-800 sm:text-3xl">
+                  My Progress
+                </h1>
+
+                <p className="mt-1 text-sm text-slate-500">
+                  Track your learning progress
+                  and academic performance.
+                </p>
+              </div>
             </div>
 
             <button
-              onClick={() => navigate("/learn")}
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
+              type="button"
+              onClick={() =>
+                navigate("/tutorhome")
+              }
+              className="hidden shrink-0 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 sm:inline-flex"
             >
               Back to Learning
               <ArrowRight size={17} />
             </button>
           </div>
 
+          {/* Mobile Back Button */}
+          <button
+            type="button"
+            onClick={() =>
+              navigate("/tutorhome")
+            }
+            className="mb-6 inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 sm:hidden"
+          >
+            Back to Learning
+            <ArrowRight size={17} />
+          </button>
+
           {/* Student Name + Profile Picture + Overall Progress */}
-          <section className="mb-8 rounded-2xl border border-slate-200 bg-white p-7 shadow-sm">
+          <section className="mb-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
             <div className="flex flex-col items-center">
 
               {/* Profile Picture */}
@@ -392,12 +456,13 @@ const Profile: React.FC = () => {
               </div>
 
               {/* Student Name */}
-              <h2 className="mt-4 text-2xl font-bold text-slate-800">
+              <h2 className="mt-4 text-center text-2xl font-bold text-slate-800">
                 {student.name}
               </h2>
 
-              <p className="mt-1 text-sm text-slate-500">
-                {student.className} • {student.level}
+              <p className="mt-1 text-center text-sm text-slate-500">
+                {student.className} •{" "}
+                {student.level}
               </p>
 
               {/* Overall Progress */}
@@ -420,7 +485,7 @@ const Profile: React.FC = () => {
                   label="Complete"
                 />
 
-                <p className="mt-4 text-sm font-semibold text-slate-700">
+                <p className="mt-4 text-center text-sm font-semibold text-slate-700">
                   {overallProgress >= 80
                     ? "Excellent progress!"
                     : overallProgress >= 60
@@ -428,8 +493,10 @@ const Profile: React.FC = () => {
                     : "Keep working consistently!"}
                 </p>
 
-                <p className="mt-1 text-xs text-slate-500">
-                  {totalTopicsDone} of {totalTopics} topics completed
+                <p className="mt-1 text-center text-xs text-slate-500">
+                  {totalTopicsDone} of{" "}
+                  {totalTopics} topics
+                  completed
                 </p>
               </div>
             </div>
@@ -556,15 +623,17 @@ const Profile: React.FC = () => {
               </h2>
 
               <p className="mt-1 text-sm text-slate-500">
-                Monitor your progress in each subject.
+                Monitor your progress in each
+                subject.
               </p>
             </div>
 
             <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
               {subjects.map((subject) => {
-                const status = getStatusBadge(
-                  subject.progress
-                );
+                const status =
+                  getStatusBadge(
+                    subject.progress
+                  );
 
                 return (
                   <div
@@ -575,7 +644,9 @@ const Profile: React.FC = () => {
                       <div>
                         <div className="flex items-center gap-2">
                           <div className="rounded-lg bg-slate-100 p-2 text-slate-700">
-                            <BookOpen size={17} />
+                            <BookOpen
+                              size={17}
+                            />
                           </div>
 
                           <h3 className="font-semibold text-slate-800">
@@ -593,8 +664,11 @@ const Profile: React.FC = () => {
                       </div>
 
                       <button
+                        type="button"
                         onClick={() =>
-                          handleOpenSubjectEdit(subject)
+                          handleOpenSubjectEdit(
+                            subject
+                          )
                         }
                         className="rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-blue-600"
                         title="Edit progress"
@@ -605,7 +679,9 @@ const Profile: React.FC = () => {
 
                     <div className="mt-6 flex justify-center">
                       <CircularProgress
-                        value={subject.progress}
+                        value={
+                          subject.progress
+                        }
                         size={135}
                         strokeWidth={10}
                       />
@@ -618,8 +694,13 @@ const Profile: React.FC = () => {
                         </p>
 
                         <p className="mt-1 text-sm font-semibold text-slate-800">
-                          {subject.topicsCompleted} /{" "}
-                          {subject.totalTopics}
+                          {
+                            subject.topicsCompleted
+                          }{" "}
+                          /{" "}
+                          {
+                            subject.totalTopics
+                          }
                         </p>
                       </div>
 
@@ -637,7 +718,7 @@ const Profile: React.FC = () => {
 
           {/* AI Recommendation */}
           {lowestSubject && (
-            <section className="mb-8 rounded-2xl border border-blue-100 bg-blue-50 p-6">
+            <section className="mb-8 rounded-2xl border border-blue-100 bg-blue-50 p-5 sm:p-6">
               <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
                 <div className="flex items-start gap-4">
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white text-blue-600 shadow-sm">
@@ -646,27 +727,37 @@ const Profile: React.FC = () => {
 
                   <div>
                     <p className="text-xs font-bold uppercase tracking-wide text-blue-600">
-                      AI Learning Recommendation
+                      AI Learning
+                      Recommendation
                     </p>
 
                     <h3 className="mt-1 text-lg font-bold text-slate-800">
-                      Focus more on {lowestSubject.name}
+                      Focus more on{" "}
+                      {lowestSubject.name}
                     </h3>
 
                     <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-600">
                       Your current progress in{" "}
                       {lowestSubject.name} is{" "}
                       <strong>
-                        {lowestSubject.progress}%
+                        {
+                          lowestSubject.progress
+                        }
+                        %
                       </strong>
-                      . Spend more time reviewing this subject
-                      to improve your overall performance.
+                      . Spend more time
+                      reviewing this subject
+                      to improve your overall
+                      performance.
                     </p>
                   </div>
                 </div>
 
                 <button
-                  onClick={() => navigate("/learn")}
+                  type="button"
+                  onClick={() =>
+                    navigate("/tutorhome")
+                  }
                   className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700"
                 >
                   Start Learning
@@ -683,128 +774,144 @@ const Profile: React.FC = () => {
             </p>
 
             <p className="mt-1 text-xs text-slate-500">
-              Your learning progress is saved automatically.
+              Your learning progress is saved
+              automatically.
             </p>
           </div>
         </div>
       </main>
 
       {/* Edit Progress Modal */}
-      {isUpdatingSubject && selectedSubject && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-4 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl">
+      {isUpdatingSubject &&
+        selectedSubject && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-4 backdrop-blur-sm">
+            <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl">
 
-            <div className="flex items-center justify-between border-b border-slate-200 px-6 py-5">
-              <div>
-                <h2 className="text-lg font-bold text-slate-800">
-                  Update Progress
-                </h2>
+              <div className="flex items-center justify-between border-b border-slate-200 px-6 py-5">
+                <div>
+                  <h2 className="text-lg font-bold text-slate-800">
+                    Update Progress
+                  </h2>
 
-                <p className="mt-1 text-xs text-slate-500">
-                  {selectedSubject.name}
-                </p>
+                  <p className="mt-1 text-xs text-slate-500">
+                    {
+                      selectedSubject.name
+                    }
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={closeEditModal}
+                  className="rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+                >
+                  <X size={20} />
+                </button>
               </div>
 
-              <button
-                onClick={() => {
-                  setIsUpdatingSubject(false);
-                  setSelectedSubject(null);
-                }}
-                className="rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
-              >
-                <X size={20} />
-              </button>
-            </div>
+              <div className="space-y-5 p-6">
+                <div className="flex justify-center">
+                  <CircularProgress
+                    value={
+                      editSubjectData.progress
+                    }
+                    size={135}
+                    strokeWidth={10}
+                    label="Progress"
+                  />
+                </div>
 
-            <div className="space-y-5 p-6">
+                <div>
+                  <label className="mb-2 block text-sm font-semibold text-slate-700">
+                    Progress Percentage
+                  </label>
 
-              <div className="flex justify-center">
-                <CircularProgress
-                  value={editSubjectData.progress}
-                  size={135}
-                  strokeWidth={10}
-                  label="Progress"
-                />
-              </div>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={
+                        editSubjectData.progress
+                      }
+                      onChange={(event) =>
+                        setEditSubjectData({
+                          ...editSubjectData,
+                          progress:
+                            Number(
+                              event.target
+                                .value
+                            ),
+                        })
+                      }
+                      className="w-full rounded-xl border border-slate-200 px-4 py-3 pr-12 text-sm text-slate-800 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    />
 
-              <div>
-                <label className="mb-2 block text-sm font-semibold text-slate-700">
-                  Progress Percentage
-                </label>
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-slate-400">
+                      %
+                    </span>
+                  </div>
+                </div>
 
-                <div className="relative">
+                <div>
+                  <label className="mb-2 block text-sm font-semibold text-slate-700">
+                    Topics Completed
+                  </label>
+
                   <input
                     type="number"
                     min="0"
-                    max="100"
-                    value={editSubjectData.progress}
+                    max={
+                      selectedSubject.totalTopics
+                    }
+                    value={
+                      editSubjectData.topicsCompleted
+                    }
                     onChange={(event) =>
                       setEditSubjectData({
                         ...editSubjectData,
-                        progress: Number(
-                          event.target.value
-                        ),
+                        topicsCompleted:
+                          Number(
+                            event.target
+                              .value
+                          ),
                       })
                     }
-                    className="w-full rounded-xl border border-slate-200 px-4 py-3 pr-12 text-sm text-slate-800 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-800 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                   />
 
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-slate-400">
-                    %
-                  </span>
+                  <p className="mt-1.5 text-xs text-slate-400">
+                    Maximum:{" "}
+                    {
+                      selectedSubject.totalTopics
+                    }{" "}
+                    topics
+                  </p>
                 </div>
               </div>
 
-              <div>
-                <label className="mb-2 block text-sm font-semibold text-slate-700">
-                  Topics Completed
-                </label>
+              <div className="flex justify-end gap-3 border-t border-slate-200 px-6 py-5">
+                <button
+                  type="button"
+                  onClick={closeEditModal}
+                  className="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+                >
+                  Cancel
+                </button>
 
-                <input
-                  type="number"
-                  min="0"
-                  max={selectedSubject.totalTopics}
-                  value={
-                    editSubjectData.topicsCompleted
+                <button
+                  type="button"
+                  onClick={
+                    handleSaveSubjectProgress
                   }
-                  onChange={(event) =>
-                    setEditSubjectData({
-                      ...editSubjectData,
-                      topicsCompleted: Number(
-                        event.target.value
-                      ),
-                    })
-                  }
-                  className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-800 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                />
-
-                <p className="mt-1.5 text-xs text-slate-400">
-                  Maximum: {selectedSubject.totalTopics} topics
-                </p>
+                  className="rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700"
+                >
+                  Save Progress
+                </button>
               </div>
             </div>
-
-            <div className="flex justify-end gap-3 border-t border-slate-200 px-6 py-5">
-              <button
-                onClick={() => {
-                  setIsUpdatingSubject(false);
-                  setSelectedSubject(null);
-                }}
-                className="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
-              >
-                Cancel
-              </button>
-
-              <button
-                onClick={handleSaveSubjectProgress}
-                className="rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700"
-              >
-                Save Progress
-              </button>
-            </div>
           </div>
-        </div>
-      )}
+        )}
     </div>
   );
 };
