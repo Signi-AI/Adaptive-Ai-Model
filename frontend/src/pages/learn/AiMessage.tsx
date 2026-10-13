@@ -89,7 +89,6 @@ export default function AiMessage({
   }, [run, total]);
 
   /*
-   * Tick + done callbacks
    */
   useEffect(() => {
     tickRef.current?.();
@@ -218,7 +217,6 @@ export default function AiMessage({
   };
 
   /*
-   * Calculate which characters should currently be visible.
    */
   let left = shown;
 
