@@ -1,0 +1,108 @@
+[
+  {
+    "id": "academic_communication__academic_communication_form_5_wazaelimu.com",
+    "title": "academic_communication_form_5_wazaelimu.com",
+    "subject": "Academic_Communication",
+    "format": "pdf",
+    "pages": 80,
+    "chars": 157423,
+    "needs_ocr": false,
+    "topic_count": 4,
+    "topics": [
+      {
+        "title": "Chapter 1: Crafting meaning",
+        "level": 1,
+        "start_page": 7,
+        "end_page": 32
+      },
+      {
+        "title": "Chapter 3: Participating in oral presentations",
+        "level": 1,
+        "start_page": 32,
+        "end_page": 55
+      },
+      {
+        "title": "Chapter 5: Making academic presentations",
+        "level": 1,
+        "start_page": 55,
+        "end_page": 68
+      },
+      {
+        "title": "Chapter 6: Using illustrations in academic communication",
+        "level": 1,
+        "start_page": 68,
+        "end_page": 80
+      }
+    ],
+    "source": "Google Drive",
+    "path": "backend/data/content/raw/Academic_Communication/academic_communication_form_5_wazaelimu.com.pdf"
+  },
+  {
+    "id": "academic_communication__academic_communication_student_s_book_six_by_mr._moris",
+    "title": "academic_communication_student_s_book_six_by_mr._moris",
+    "subject": "Academic_Communication",
+    "format": "pdf",
+    "pages": 97,
+    "chars": 187196,
+    "needs_ocr": false,
+    "topic_count": 9,
+    "topics": [
+      {
+        "title": "Chapter 1: Wars",
+        "level": 1,
+        "start_page": 8,
+        "end_page": 19
+      },
+      {
+        "title": "Chapter 2: Inferring meanings from various texts",
+        "level": 1,
+        "start_page": 19,
+        "end_page": 30
+      },
+      {
+        "title": "Chapter 3: Mastering report writing skills",
+        "level": 1,
+        "start_page": 30,
+        "end_page": 39
+      },
+      {
+        "title": "Chapter 4: Speaking with confidence and clarity",
+        "level": 1,
+        "start_page": 39,
+        "end_page": 49
+      },
+      {
+        "title": "Chapter 5: Crafting clear and professional messages",
+        "level": 1,
+        "start_page": 49,
+        "end_page": 56
+      },
+      {
+        "title": "Chapter 6: Writing project proposals and reports",
+        "level": 1,
+        "start_page": 56,
+        "end_page": 64
+      },
+      {
+        "title": "Chapter 7: Using ICT for research and referencing",
+        "level": 1,
+        "start_page": 64,
+        "end_page": 74
+      },
+      {
+        "title": "Chapter 8: Preparing and delivering academic prescntations",
+        "level": 1,
+        "start_page": 74,
+        "end_page": 86
+      },
+      {
+        "title": "Chapter 9: Interpreting and using visual representations",
+        "level": 1,
+        "start_page": 86,
+        "end_page": 97
+      }
+    ],
+    "source": "Google Drive",
+    "path": "backend/data/content/raw/Academic_Communication/academic_communication_student_s_book_six_by_mr._moris.pdf"
+  }
+]

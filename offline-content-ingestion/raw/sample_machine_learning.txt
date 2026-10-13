@@ -1,0 +1,9 @@
+Machine Learning Introduction
+
+Machine learning is a branch of artificial intelligence that allows computers to learn patterns from data and make predictions or decisions without being explicitly programmed for every task.
+
+Supervised learning uses labeled training data. In supervised learning, each training example contains an input and a known target output. Classification and regression are common supervised learning tasks.
+
+Unsupervised learning works with data that does not have labeled target values. Clustering is an example of unsupervised learning where similar data points are grouped together.
+
+Machine learning can be applied in healthcare, agriculture, finance, education, transportation, and many other fields.
