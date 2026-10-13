@@ -1,8 +1,3 @@
-<<<<<<< HEAD
-import { useCallback, useEffect, useRef, useState } from "react";
-import type { CSSProperties, FormEvent, KeyboardEvent, ReactNode } from "react";
-import { ArrowUp, Menu, Moon, Sun } from "lucide-react";
-=======
 import {
   useCallback,
   useEffect,
@@ -25,7 +20,6 @@ import {
   Sun,
 } from "lucide-react";
 
->>>>>>> 6d22643 (student frontend development)
 import AiMessage from "./AiMessage";
 import type { RecentLesson } from "./LearnSidebar";
 import SubjectBackground from "./SubjectBackground";
@@ -82,12 +76,6 @@ function loadRecents(): RecentLesson[] {
 const pill =
   "rounded-full border border-learn-line bg-learn-panel px-3.5 py-1.5 text-sm font-medium text-learn-ink transition-colors hover:border-learn-accent hover:bg-learn-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-learn-accent";
 
-<<<<<<< HEAD
-export default function TutorHome() {
-  const [dark, setDark] = useState(() => window.matchMedia("(prefers-color-scheme: dark)").matches);
-  const [subject, setSubject] = useState<Subject | null>(null);
-  const [level, setLevel] = useState("");
-=======
 export interface TutorHomeProps {
   children?: ReactNode;
 }
@@ -111,7 +99,6 @@ export const TutorHome: FC<TutorHomeProps> = () => {
     () => localStorage.getItem("studentLevel") || ""
   );
 
->>>>>>> 6d22643 (student frontend development)
   const [busy, setBusy] = useState(true);
 
   const [draft, setDraft] = useState("");

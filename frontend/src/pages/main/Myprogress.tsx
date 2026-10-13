@@ -3,16 +3,11 @@ import { useNavigate } from "react-router-dom";
 import {
   BookOpen,
   Edit3,
-<<<<<<< HEAD
-  Camera,
-  ArrowRight,
-=======
   Flame,
   Menu,
   Sparkles,
   Target,
   TrendingUp,
->>>>>>> 6d22643 (student frontend development)
   X,
   CheckCircle2,
   Flame,
@@ -27,12 +22,7 @@ import {
 } from "lucide-react";
 
 import logo from "../../assets/logo.jpeg";
-<<<<<<< HEAD
-import heroBg from "../../assets/herobg.jpeg";
-import StudentSidebar from "./StudentSidebar";
-=======
 import { useStudentLayout } from "./Studentlayout";
->>>>>>> 6d22643 (student frontend development)
 
 interface Student {
   name: string;
@@ -99,156 +89,6 @@ const INITIAL_SUBJECTS: Subject[] = [
   },
 ];
 
-<<<<<<< HEAD
-const Profile: React.FC = () => {
-  const navigate = useNavigate();
-
-  // =========================
-  // STUDENT INFORMATION
-  // =========================
-  const [student, setStudent] = useState<Student>(() => {
-    const saved = localStorage.getItem("student_profile_data");
-    return saved
-      ? JSON.parse(saved)
-      : {
-          name: "Comfotha Mwansasule",
-          level: "Secondary School",
-          className: "Form 3",
-          school: "Example Secondary School",
-        };
-  });
-
-  useEffect(() => {
-    localStorage.setItem("student_profile_data", JSON.stringify(student));
-  }, [student]);
-
-  // =========================
-  // PROFILE IMAGE
-  // =========================
-  const [profileImage, setProfileImage] = useState<string | null>(() => {
-    return localStorage.getItem("student_profile_image") || null;
-  });
-
-  const handleProfileImage = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (!file.type.startsWith("image/")) {
-      alert("Please select an image file.");
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      alert("Image size should not exceed 5MB.");
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = reader.result as string;
-      setProfileImage(result);
-      localStorage.setItem("student_profile_image", result);
-    };
-    reader.readAsDataURL(file);
-  };
-
-  // =========================
-  // SUBJECTS & PROGRESS STATE
-  // =========================
-  const [subjects, setSubjects] = useState<Subject[]>(() => {
-    const saved = localStorage.getItem("student_subjects_data");
-    return saved ? JSON.parse(saved) : INITIAL_SUBJECTS;
-  });
-
-  const [selectedSubject, setSelectedSubject] = useState<Subject | null>(
-    null
-  );
-  const [isUpdatingSubject, setIsUpdatingSubject] = useState<boolean>(false);
-  const [editSubjectData, setEditSubjectData] = useState<Subject | null>(null);
-
-  useEffect(() => {
-    localStorage.setItem("student_subjects_data", JSON.stringify(subjects));
-  }, [subjects]);
-
-  // Overall calculations
-  const overallProgress = Math.round(
-    subjects.reduce((acc, curr) => acc + curr.progress, 0) / subjects.length
-  );
-
-  const totalTopicsDone = subjects.reduce(
-    (acc, curr) => acc + curr.topicsCompleted,
-    0
-  );
-
-  // Lowest progress subject recommendation
-  const lowestSubject = [...subjects].sort(
-    (a, b) => a.progress - b.progress
-  )[0];
-
-  // Update subject progress handler
-  const handleSaveSubjectProgress = () => {
-    if (!editSubjectData) return;
-    setSubjects((prev) =>
-      prev.map((s) => (s.id === editSubjectData.id ? editSubjectData : s))
-    );
-    setIsUpdatingSubject(false);
-  };
-
-  // Status Badge Helper
-  const getStatusBadge = (progress: number) => {
-    if (progress >= 80) {
-      return (
-        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-bold text-emerald-400 border border-emerald-500/20">
-          <Award size={10} /> Mastered
-        </span>
-      );
-    }
-    if (progress >= 60) {
-      return (
-        <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/10 px-2.5 py-0.5 text-[10px] font-bold text-blue-400 border border-blue-500/20">
-          <TrendingUp size={10} /> On Track
-        </span>
-      );
-    }
-    return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2.5 py-0.5 text-[10px] font-bold text-amber-400 border border-amber-500/20">
-        <AlertCircle size={10} /> Needs Review
-      </span>
-    );
-  };
-
-  // =========================
-  // EDIT PROFILE MODAL
-  // =========================
-  const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState<Student>(student);
-
-  const handleEdit = () => {
-    setFormData(student);
-    setIsEditing(true);
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((previous) => ({ ...previous, [name]: value }));
-  };
-
-  const handleSave = () => {
-    setStudent(formData);
-    setIsEditing(false);
-  };
-
-  return (
-    <div className="min-h-screen bg-white font-sans text-slate-100 antialiased">
-      <div>
-        <StudentSidebar />
-      </div>
-      <div className="ml-60">
-        <div className="fixed inset-0 pointer-events-none overflow-hidden">
-          <div className="absolute -left-40 -top-40 h-96 w-96 rounded-full bg-purple-600/15 blur-3xl" />
-          <div className="absolute right-0 top-1/3 h-96 w-96 rounded-full bg-blue-600/10 blur-3xl" />
-        </div>
-=======
 const CircularProgress: React.FC<CircularProgressProps> = ({
   value,
   size = 120,
@@ -286,7 +126,6 @@ const CircularProgress: React.FC<CircularProgressProps> = ({
           strokeWidth={strokeWidth}
           className="text-slate-200"
         />
->>>>>>> 6d22643 (student frontend development)
 
         <div className="relative mx-auto max-w-6xl px-4 py-8 md:px-8">
           {/* HEADER */}
@@ -780,8 +619,6 @@ const CircularProgress: React.FC<CircularProgressProps> = ({
   );
 };
 
-<<<<<<< HEAD
-=======
 const Profile: React.FC = () => {
   const navigate = useNavigate();
 
@@ -1540,5 +1377,4 @@ const Profile: React.FC = () => {
   );
 };
 
->>>>>>> 6d22643 (student frontend development)
 export default Profile;
