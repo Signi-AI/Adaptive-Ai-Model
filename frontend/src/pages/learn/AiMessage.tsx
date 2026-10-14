@@ -58,7 +58,6 @@ export default function AiMessage({
   }, [run, total]);
 
   /*
-   * Typing animation
    */
   useEffect(() => {
     startRef.current?.();
