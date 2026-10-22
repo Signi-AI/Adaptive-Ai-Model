@@ -17,6 +17,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 from app.core.validators import role_name_from_value
 from app.models.role import AccountStatus, UserRole
 from app.models.user import ClassLevel
+from app.schemas.subject import SubjectResponse
 
 _USERNAME_PATTERN = re.compile(r"^[a-zA-Z0-9_]{3,32}$")
 
@@ -59,9 +60,16 @@ class StudentPublic(BaseModel):
 
 
 class StudentUpdate(BaseModel):
-    """Only the fields a student is allowed to change about themselves."""
+    """Fields a student can update from their existing profile interface."""
     full_name: str | None = Field(default=None, min_length=2, max_length=120)
     class_level: ClassLevel | None = None
+
+
+class StudentCurriculum(BaseModel):
+    """The active curriculum resolved from the student's registered class."""
+
+    academic_level_id: uuid.UUID | None
+    subjects: list[SubjectResponse]
 
 
 class SessionPublic(BaseModel):

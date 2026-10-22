@@ -1,0 +1,11 @@
+PUT YOUR TEXTBOOK PDF FILES IN THIS FOLDER (data/raw/).
+
+Recommended layout (subfolders are optional, they only keep you organised):
+
+  data/raw/mathematics/form-2/mathematics_form2.pdf
+  data/raw/mathematics/std-5/hisabati_darasa5.pdf
+  data/raw/biology/form-2/biology_form2.pdf
+
+After copying a PDF here you MUST also describe it in data/manifest.json
+(copy data/manifest.example.json to data/manifest.json). A PDF that is not listed in the
+manifest is ignored. See README.md, section "Where the textbooks go".

@@ -27,7 +27,10 @@ def create_subject(
     try:
         return CurriculumService.create_subject(
             db,
-            subject_data,
+            subject_data.name,
+            subject_data.code,
+            subject_data.description,
+            subject_data.academic_level_id,
         )
 
     except ValueError as error:
@@ -57,16 +60,10 @@ def get_subject(
     subject_id: UUID,  # Changed from int to UUID
     db: Session = Depends(get_db),
 ):
-    if subject := CurriculumService.get_subject(
-        db,
-        subject_id,
-    ):
-        return subject
-
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
-        detail="Subject not found",
-    )
+    try:
+        return CurriculumService.get_subject(db, subject_id)
+    except ValueError as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(error)) from error
 
 @router.put(
     "/{subject_id}",
@@ -77,17 +74,7 @@ def update_subject(
     subject_data: SubjectUpdate,
     db: Session = Depends(get_db),
 ):
-    if subject := CurriculumService.update_subject(
-        db,
-        subject_id,
-        subject_data,
-    ):
-        return subject
-
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
-        detail="Subject not found",
-    )
+    raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail="Subject updates are not available")
 
 @router.patch(
     "/{subject_id}/deactivate",
@@ -97,13 +84,4 @@ def deactivate_subject(
     subject_id: UUID,  
     db: Session = Depends(get_db),
 ):
-    if subject := CurriculumService.deactivate_subject(
-        db,
-        subject_id,
-    ):
-        return subject
-
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
-        detail="Subject not found",
-    )
+    raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail="Subject updates are not available")

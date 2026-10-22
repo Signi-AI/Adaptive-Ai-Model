@@ -23,6 +23,11 @@ class Settings(BaseSettings):
     refresh_token_expire_days: int = 14
     access_token_expire_minutes: int = 30 
 
+    # Address of the separate local Artificial Teacher process.
+    teacher_model_url: str = "http://127.0.0.1:8100"
+    teacher_model_api_key: str = ""
+    teacher_model_timeout_seconds: float = 130.0
+
         # 2. PROVIDE AN ARRAY OF FALLBACKS
     model_config = SettingsConfigDict(
         # Pydantic checks these in order; the first file found wins!

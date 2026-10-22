@@ -17,6 +17,7 @@ import {
 
 import logo from "../../assets/logo.jpeg";
 import { useStudentLayout } from "./Studentlayout";
+import { api, getTokens } from "../../lib/api";
 
 interface Student {
   name: string;
@@ -41,55 +42,18 @@ interface CircularProgressProps {
   label?: string;
 }
 
+type ApiStudent = { full_name: string; class_level: string | null };
+type ApiProgressSubject = { subject_id: string; subject_name: string; topics_total: number; topics_studied: number; completion: number; average_mastery: number };
+type ApiProgress = { completion: number; topics_total: number; topics_studied: number; questions_attempted: number; subjects: ApiProgressSubject[] };
+type ApiCurriculum = { academic_level_id: string | null };
+type ApiRecommendation = { subject_name: string; topic_name: string; action: string; reason: string };
+
 const INITIAL_STUDENT: Student = {
   name: "Comfotha Mwansasule",
   level: "Secondary School",
   className: "Form 3",
   school: "Example Secondary School",
 };
-
-const INITIAL_SUBJECTS: Subject[] = [
-  {
-    id: "math",
-    name: "Mathematics",
-    progress: 72,
-    category: "Mathematics",
-    topicsCompleted: 18,
-    totalTopics: 25,
-  },
-  {
-    id: "english",
-    name: "English",
-    progress: 81,
-    category: "Languages",
-    topicsCompleted: 21,
-    totalTopics: 26,
-  },
-  {
-    id: "biology",
-    name: "Biology",
-    progress: 70,
-    category: "Science",
-    topicsCompleted: 14,
-    totalTopics: 20,
-  },
-  {
-    id: "chemistry",
-    name: "Chemistry",
-    progress: 63,
-    category: "Science",
-    topicsCompleted: 12,
-    totalTopics: 19,
-  },
-  {
-    id: "physics",
-    name: "Physics",
-    progress: 52,
-    category: "Science",
-    topicsCompleted: 11,
-    totalTopics: 21,
-  },
-];
 
 const CircularProgress: React.FC<CircularProgressProps> = ({
   value,
@@ -163,7 +127,7 @@ const Profile: React.FC = () => {
 
   const { openMenu } = useStudentLayout();
 
-  const [student] = useState<Student>(() => {
+  const [student, setStudent] = useState<Student>(() => {
     try {
       const saved = localStorage.getItem(
         "student_profile_data"
@@ -189,21 +153,11 @@ const Profile: React.FC = () => {
     }
   });
 
-  const [subjects, setSubjects] =
-    useState<Subject[]>(() => {
-      try {
-        const saved =
-          localStorage.getItem(
-            "student_subjects_data"
-          );
+  const [subjects, setSubjects] = useState<Subject[]>([]);
 
-        return saved
-          ? JSON.parse(saved)
-          : INITIAL_SUBJECTS;
-      } catch {
-        return INITIAL_SUBJECTS;
-      }
-    });
+  const [recommendation, setRecommendation] = useState<ApiRecommendation | null>(null);
+
+  const [questionsAttempted, setQuestionsAttempted] = useState(0);
 
   const [selectedSubject, setSelectedSubject] =
     useState<Subject | null>(null);
@@ -218,11 +172,32 @@ const Profile: React.FC = () => {
     });
 
   useEffect(() => {
-    localStorage.setItem(
-      "student_subjects_data",
-      JSON.stringify(subjects)
-    );
-  }, [subjects]);
+    if (!getTokens()) return;
+    Promise.all([api<ApiStudent>("/students/me"), api<ApiCurriculum>("/students/me/curriculum"), api<ApiRecommendation[]>("/recommendations")])
+      .then(async ([profile, curriculum, recommendations]) => {
+        const suffix = curriculum.academic_level_id ? `?academic_level_id=${curriculum.academic_level_id}` : "";
+        const progress = await api<ApiProgress>(`/progress${suffix}`);
+        setStudent((current) => ({
+          ...current,
+          name: profile.full_name,
+          className: profile.class_level ? profile.class_level.replace("STD_", "Standard ").replace("FORM_", "Form ") : current.className,
+          level: profile.class_level?.startsWith("FORM_") ? "Secondary School" : profile.class_level ? "Primary School" : current.level,
+        }));
+        setSubjects(progress.subjects.map((item) => ({
+          id: item.subject_id,
+          name: item.subject_name,
+          progress: Math.round(item.average_mastery * 100),
+          category: item.subject_name.toLowerCase().includes("math") ? "Mathematics" : item.subject_name.toLowerCase().includes("english") || item.subject_name.toLowerCase().includes("swahili") || item.subject_name.toLowerCase().includes("language") ? "Languages" : "Science",
+          topicsCompleted: item.topics_studied,
+          totalTopics: item.topics_total,
+        })));
+        setQuestionsAttempted(progress.questions_attempted);
+        setRecommendation(recommendations[0] || null);
+      })
+      .catch(() => {
+        // Keep the current UI empty rather than inventing progress when the local backend is unavailable.
+      });
+  }, []);
 
   const overallProgress = useMemo(() => {
     if (!subjects.length) return 0;
@@ -251,18 +226,6 @@ const Profile: React.FC = () => {
       (sum, subject) =>
         sum + subject.totalTopics,
       0
-    );
-  }, [subjects]);
-
-  const lowestSubject = useMemo(() => {
-    if (!subjects.length) return null;
-
-    return subjects.reduce(
-      (lowest, subject) =>
-        subject.progress <
-        lowest.progress
-          ? subject
-          : lowest
     );
   }, [subjects]);
 
@@ -325,44 +288,6 @@ const Profile: React.FC = () => {
     });
 
     setIsUpdatingSubject(true);
-  };
-
-  const handleSaveSubjectProgress = () => {
-    if (!selectedSubject) return;
-
-    const progress = Math.min(
-      100,
-      Math.max(
-        0,
-        Number(editSubjectData.progress) || 0
-      )
-    );
-
-    const topicsCompleted = Math.min(
-      selectedSubject.totalTopics,
-      Math.max(
-        0,
-        Number(
-          editSubjectData.topicsCompleted
-        ) || 0
-      )
-    );
-
-    setSubjects((currentSubjects) =>
-      currentSubjects.map((subject) =>
-        subject.id ===
-        selectedSubject.id
-          ? {
-              ...subject,
-              progress,
-              topicsCompleted,
-            }
-          : subject
-      )
-    );
-
-    setIsUpdatingSubject(false);
-    setSelectedSubject(null);
   };
 
   const closeEditModal = () => {
@@ -546,16 +471,16 @@ const Profile: React.FC = () => {
                 </div>
               </div>
 
-              {/* Assignments */}
+              {/* Answer submissions */}
               <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-semibold text-slate-800">
-                      Assignments Done
+                      Questions Answered
                     </p>
 
                     <p className="mt-1 text-xs text-slate-500">
-                      Completed assignments
+                      Saved answer submissions
                     </p>
                   </div>
 
@@ -565,11 +490,11 @@ const Profile: React.FC = () => {
                 </div>
 
                 <p className="mt-6 text-4xl font-bold text-slate-800">
-                  18
+                  {questionsAttempted}
                 </p>
 
                 <p className="mt-5 text-xs font-medium text-green-600">
-                  Good completion record
+                  Updates after each submitted answer
                 </p>
               </div>
 
@@ -593,11 +518,11 @@ const Profile: React.FC = () => {
 
                 <div className="mt-6 flex items-end gap-2">
                   <span className="text-4xl font-bold text-slate-800">
-                    7
+                    —
                   </span>
 
                   <span className="mb-1 text-sm text-slate-500">
-                    days
+                    not tracked yet
                   </span>
                 </div>
 
@@ -717,7 +642,7 @@ const Profile: React.FC = () => {
           </section>
 
           {/* AI Recommendation */}
-          {lowestSubject && (
+          {recommendation && (
             <section className="mb-8 rounded-2xl border border-blue-100 bg-blue-50 p-5 sm:p-6">
               <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
                 <div className="flex items-start gap-4">
@@ -733,22 +658,11 @@ const Profile: React.FC = () => {
 
                     <h3 className="mt-1 text-lg font-bold text-slate-800">
                       Focus more on{" "}
-                      {lowestSubject.name}
+                      {recommendation.subject_name}: {recommendation.topic_name}
                     </h3>
 
                     <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-600">
-                      Your current progress in{" "}
-                      {lowestSubject.name} is{" "}
-                      <strong>
-                        {
-                          lowestSubject.progress
-                        }
-                        %
-                      </strong>
-                      . Spend more time
-                      reviewing this subject
-                      to improve your overall
-                      performance.
+                      {recommendation.reason} {recommendation.action}
                     </p>
                   </div>
                 </div>
@@ -823,7 +737,7 @@ const Profile: React.FC = () => {
 
                 <div>
                   <label className="mb-2 block text-sm font-semibold text-slate-700">
-                    Progress Percentage
+                    Calculated Mastery
                   </label>
 
                   <div className="relative">
@@ -834,16 +748,7 @@ const Profile: React.FC = () => {
                       value={
                         editSubjectData.progress
                       }
-                      onChange={(event) =>
-                        setEditSubjectData({
-                          ...editSubjectData,
-                          progress:
-                            Number(
-                              event.target
-                                .value
-                            ),
-                        })
-                      }
+                      readOnly
                       className="w-full rounded-xl border border-slate-200 px-4 py-3 pr-12 text-sm text-slate-800 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                     />
 
@@ -855,7 +760,7 @@ const Profile: React.FC = () => {
 
                 <div>
                   <label className="mb-2 block text-sm font-semibold text-slate-700">
-                    Topics Completed
+                    Topics Studied
                   </label>
 
                   <input
@@ -867,21 +772,12 @@ const Profile: React.FC = () => {
                     value={
                       editSubjectData.topicsCompleted
                     }
-                    onChange={(event) =>
-                      setEditSubjectData({
-                        ...editSubjectData,
-                        topicsCompleted:
-                          Number(
-                            event.target
-                              .value
-                          ),
-                      })
-                    }
+                    readOnly
                     className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-800 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                   />
 
                   <p className="mt-1.5 text-xs text-slate-400">
-                    Maximum:{" "}
+                    Updated automatically from completed lessons and answers. Total topics:{" "}
                     {
                       selectedSubject.totalTopics
                     }{" "}
@@ -901,12 +797,10 @@ const Profile: React.FC = () => {
 
                 <button
                   type="button"
-                  onClick={
-                    handleSaveSubjectProgress
-                  }
+                  onClick={closeEditModal}
                   className="rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700"
                 >
-                  Save Progress
+                  Close
                 </button>
               </div>
             </div>

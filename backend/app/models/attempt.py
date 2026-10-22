@@ -86,6 +86,9 @@ class Attempt(Base):
         nullable=False,
         index=True,
     )
+    client_submission_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), nullable=True, index=True
+    )
 
     # Curriculum references (using unified UUID id_column_type)
     subject_id: Mapped[uuid.UUID] = mapped_column(

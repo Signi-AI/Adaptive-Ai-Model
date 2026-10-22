@@ -1,26 +1,32 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 
 import logo from "../../assets/logo.jpeg";
 import heroBg from "../../assets/herobg.jpeg";
-import { auth } from "../../../src/Firebase";
+import { signIn } from "../../lib/api";
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
 
   const [showPassword, setShowPassword] = useState(false);
   const [loadingGoogle, setLoadingGoogle] = useState(false);
+  const [loadingLogin, setLoadingLogin] = useState(false);
   const [error, setError] = useState("");
 
   // Email/password login
-  const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
     setError("");
-
-    // Redirect directly to TutorHome
-    navigate("/tutorhome");
+    setLoadingLogin(true);
+    const values = new FormData(e.currentTarget);
+    try {
+      await signIn(String(values.get("username") || ""), String(values.get("password") || ""));
+      navigate("/tutorhome");
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Login failed. Please try again.");
+    } finally {
+      setLoadingLogin(false);
+    }
   };
 
   // Google Login
@@ -31,75 +37,7 @@ const Login: React.FC = () => {
     setLoadingGoogle(true);
 
     try {
-      const provider = new GoogleAuthProvider();
-
-      provider.setCustomParameters({
-        prompt: "select_account",
-      });
-
-      const result = await signInWithPopup(auth, provider);
-
-      const user = result.user;
-
-      console.log("Google login successful:", {
-        uid: user.uid,
-        name: user.displayName,
-        email: user.email,
-        photo: user.photoURL,
-      });
-
-      // Redirect directly to TutorHome
-      navigate("/tutorhome");
-    } catch (error: any) {
-      console.error("Google login error:", error);
-
-      switch (error?.code) {
-        case "auth/popup-closed-by-user":
-          setError("Google sign-in was cancelled.");
-          break;
-
-        case "auth/popup-blocked":
-          setError(
-            "Google sign-in popup was blocked. Please allow popups for this website."
-          );
-          break;
-
-        case "auth/cancelled-popup-request":
-          setError(
-            "Another Google sign-in request is already running."
-          );
-          break;
-
-        case "auth/unauthorized-domain":
-          setError(
-            "This website is not authorized in Firebase. Add your current domain in Firebase Authentication settings."
-          );
-          break;
-
-        case "auth/api-key-not-valid":
-          setError(
-            "The Firebase API key is invalid. Check your Firebase configuration."
-          );
-          break;
-
-        case "auth/account-exists-with-different-credential":
-          setError(
-            "An account already exists with this email using another sign-in method."
-          );
-          break;
-
-        case "auth/network-request-failed":
-          setError(
-            "Network error. Please check your internet connection and try again."
-          );
-          break;
-
-        default:
-          setError(
-            error?.message ||
-              "Google sign-in failed. Please try again."
-          );
-      }
+      setError("Google sign-in is unavailable in offline mode. Use your database username and password.");
     } finally {
       setLoadingGoogle(false);
     }
@@ -234,7 +172,8 @@ const Login: React.FC = () => {
               </label>
 
               <input
-                id="email"
+                id="username"
+                name="username"
                 type="text"
                 placeholder="Enter your username or email"
                 required
@@ -263,6 +202,7 @@ const Login: React.FC = () => {
               <div className="relative">
                 <input
                   id="password"
+                name="password"
                   type={showPassword ? "text" : "password"}
                   placeholder="Enter your password"
                   required
@@ -284,9 +224,10 @@ const Login: React.FC = () => {
             {/* Login button */}
             <button
               type="submit"
+              disabled={loadingLogin}
               className="w-full rounded-xl bg-purple-600 py-3 text-sm font-bold text-white shadow-md transition-all duration-300 hover:bg-purple-700 hover:shadow-lg active:scale-[0.98]"
             >
-              Login →
+              {loadingLogin ? "Logging in..." : "Login →"}
             </button>
           </form>
 

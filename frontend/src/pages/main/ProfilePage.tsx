@@ -17,6 +17,7 @@ import {
   Bookmark,
   User,
 } from "lucide-react";
+import { api, getTokens } from "../../lib/api";
 
 interface Student {
   name: string;
@@ -24,6 +25,21 @@ interface Student {
   className: string;
   school: string;
 }
+
+type StudentProfileResponse = {
+  full_name: string;
+  class_level: string | null;
+};
+
+const classLabel = (value: string | null) =>
+  value ? value.replace("STD_", "Standard ").replace("FORM_", "Form ") : "";
+
+const classValue = (value: string) => {
+  const normalized = value.trim().toUpperCase().replace(/\s+/g, "_");
+  if (/^(STD|STANDARD)_[1-7]$/.test(normalized)) return normalized.replace("STANDARD", "STD");
+  if (/^FORM_[1-6]$/.test(normalized)) return normalized;
+  return null;
+};
 
 const Profile: React.FC = () => {
   const navigate = useNavigate();
@@ -58,6 +74,23 @@ const Profile: React.FC = () => {
       JSON.stringify(student)
     );
   }, [student]);
+
+  useEffect(() => {
+    if (!getTokens()) return;
+    api<StudentProfileResponse>("/students/me")
+      .then((profile) => {
+        const className = classLabel(profile.class_level);
+        setStudent((current) => ({
+          ...current,
+          name: profile.full_name,
+          className: className || current.className,
+          level: profile.class_level?.startsWith("FORM_") ? "Secondary School" : profile.class_level ? "Primary School" : current.level,
+        }));
+      })
+      .catch(() => {
+        // Retain the existing local profile if the backend is temporarily offline.
+      });
+  }, []);
 
   const [profileImage, setProfileImage] =
     useState<string | null>(() => {
@@ -134,9 +167,27 @@ const Profile: React.FC = () => {
     );
   };
 
-  const handleSave = () => {
-    setStudent(formData);
-    setIsEditing(false);
+  const handleSave = async () => {
+    const nextClass = classValue(formData.className);
+    try {
+      if (getTokens()) {
+        const saved = await api<StudentProfileResponse>("/students/me", {
+          method: "PATCH",
+          body: JSON.stringify({
+            full_name: formData.name,
+            ...(nextClass ? { class_level: nextClass } : {}),
+          }),
+        });
+        setStudent({ ...formData, name: saved.full_name, className: classLabel(saved.class_level) || formData.className });
+      } else {
+        setStudent(formData);
+      }
+      setIsEditing(false);
+    } catch {
+      // The existing profile remains editable even if a local server is down.
+      setStudent(formData);
+      setIsEditing(false);
+    }
   };
 
   return (
