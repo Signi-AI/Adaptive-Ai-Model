@@ -1,0 +1,11 @@
+.env
+.venv/
+__pycache__/
+.pytest_cache/
+# Textbooks are copyrighted and large. Do not push them to GitHub. Share them with the team another way.
+data/raw/**/*.pdf
+data/raw/**/*.PDF
+# Generated from the books. Contains their text, so also not committed.
+data/processed/*
+!data/processed/.gitkeep
+data/manifest.json

@@ -1,18 +1,21 @@
 import type { Subject } from "./data";
-import { LEVELS, SUBJECTS } from "./data";
+import { SUBJECTS } from "./data";
 
 interface Props {
   selected: Subject | null;
-  level: string;
   locked: boolean;
   onPick: (s: Subject) => void;
-  onLevel: (level: string) => void;
+  availableNames?: string[];
 }
 
-export default function SubjectCards({ selected, level, locked, onPick, onLevel }: Props) {
+export default function SubjectCards({ selected, locked, onPick, availableNames }: Props) {
+  const visibleSubjects = availableNames?.length
+    ? SUBJECTS.filter((subject) => availableNames.some((name) => name.trim().toLowerCase() === subject.name.trim().toLowerCase()))
+    : SUBJECTS;
+
   return (
     <div className="mt-3 grid grid-cols-[repeat(auto-fill,minmax(132px,1fr))] gap-2">
-      {SUBJECTS.map((s) => {
+      {visibleSubjects.map((s) => {
         const isSel = selected?.key === s.key;
         const dim = locked && !isSel;
         return (
@@ -39,24 +42,6 @@ export default function SubjectCards({ selected, level, locked, onPick, onLevel 
               </div>
               <b className="text-[15px] font-semibold text-learn-ink">{s.name}</b>
             </div>
-            {isSel && (
-              <select
-                value={level}
-                onClick={(e) => e.stopPropagation()}
-                onChange={(e) => onLevel(e.target.value)}
-                aria-label="Your class"
-                className="mt-2 w-full rounded-lg border border-learn-line bg-learn-bg px-2 py-1.5 text-sm font-medium text-learn-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-learn-accent"
-              >
-                <option value="" disabled>
-                  Choose your class
-                </option>
-                {LEVELS.map((l) => (
-                  <option key={l} value={l}>
-                    {l}
-                  </option>
-                ))}
-              </select>
-            )}
           </div>
         );
       })}

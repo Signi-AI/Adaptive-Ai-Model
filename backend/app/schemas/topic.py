@@ -1,10 +1,11 @@
 from datetime import datetime
+from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
 
 
 class TopicBase(BaseModel):
-    subject_id: int
+    subject_id: UUID
     name: str
     description: str | None = None
     sequence: int
@@ -16,7 +17,7 @@ class TopicCreate(TopicBase):
 
 
 class TopicUpdate(BaseModel):
-    subject_id: int | None = None
+    subject_id: UUID | None = None
     name: str | None = None
     description: str | None = None
     sequence: int | None = None
@@ -24,7 +25,7 @@ class TopicUpdate(BaseModel):
 
 
 class TopicResponse(TopicBase):
-    id: int
+    id: UUID
     created_at: datetime
     updated_at: datetime
 

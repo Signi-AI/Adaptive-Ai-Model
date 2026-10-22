@@ -14,7 +14,6 @@ from app.api.routes import (
     progress,
     recommendations,
     sessions,
-    student_curriculum,
     students,
     subjects,
     teacher,
@@ -35,7 +34,6 @@ api_router.include_router(topics.router)
 api_router.include_router(lesson.router)
 api_router.include_router(learning_objectives.router)
 api_router.include_router(curriculum.router)
-api_router.include_router(student_curriculum.router)
 api_router.include_router(adaptive.router)
 api_router.include_router(mastery.router)
 api_router.include_router(progress.router)

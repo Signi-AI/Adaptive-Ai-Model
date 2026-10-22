@@ -8,6 +8,7 @@ import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
 import LearnSidebar from "../learn/LearnSidebar";
 import type { RecentLesson } from "../learn/LearnSidebar";
+import { getTokens } from "../../lib/api";
 
 interface StudentLayoutContextType {
   openMenu: () => void;
@@ -73,6 +74,12 @@ const StudentLayout: React.FC = () => {
   useEffect(() => {
     setMenu(false);
   }, [location.pathname]);
+
+  useEffect(() => {
+    if (!getTokens()) {
+      navigate("/login", { replace: true });
+    }
+  }, [navigate]);
 
   /*
    * Keep sidebar data updated

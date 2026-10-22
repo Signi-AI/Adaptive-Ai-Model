@@ -30,8 +30,6 @@ import {
 
   ArrowUp,
 
-  History,
-
   Menu,
 
   Moon,
@@ -64,13 +62,11 @@ import {
 
   SUBJECTS,
 
-  lessonText,
-
 } from "./data";
 
 import type { Subject } from "./data";
 
-import { useStudentLayout } from "../main/Studentlayout";
+import { api, getTokens } from "../../lib/api";
 
 type Extra =
 
@@ -123,6 +119,14 @@ export interface ChatSession {
   messages: Msg[];
 
 }
+
+type ApiSubject = { id: string; name: string };
+type ApiTopic = { id: string; name: string };
+type ApiCurriculum = { subjects: ApiSubject[] };
+type ApiStudent = { class_level: string | null };
+
+const classLabel = (value: string | null) =>
+  value ? value.replace("STD_", "Standard ").replace("FORM_", "Form ") : "";
 
 const WELCOME = [
 
@@ -180,8 +184,6 @@ export interface TutorHomeProps {
 
 export const TutorHome: FC<TutorHomeProps> = () => {
 
-  const { openMenu } = useStudentLayout();
-
   const [dark, setDark] = useState(() =>
 
     window.matchMedia("(prefers-color-scheme: dark)").matches
@@ -190,11 +192,11 @@ export const TutorHome: FC<TutorHomeProps> = () => {
 
   const [subject, setSubject] = useState<Subject | null>(null);
 
-  const [level, setLevel] = useState(
+  const [level, setLevel] = useState("");
 
-    () => localStorage.getItem("studentLevel") || ""
+  const [apiSubjects, setApiSubjects] = useState<ApiSubject[]>([]);
 
-  );
+  const [learningSession, setLearningSession] = useState<{ id: string; subjectKey: string; topic: string } | null>(null);
 
   const [busy, setBusy] = useState(false);
 
@@ -235,6 +237,20 @@ export const TutorHome: FC<TutorHomeProps> = () => {
     },
 
   ]);
+
+  /* The registered class comes from the database; it is never chosen here. */
+  useEffect(() => {
+    if (!getTokens()) return;
+    Promise.all([api<ApiStudent>("/students/me"), api<ApiCurriculum>("/students/me/curriculum")])
+      .then(([student, curriculum]) => {
+        const savedLevel = classLabel(student.class_level);
+        if (savedLevel) setLevel(savedLevel);
+        setApiSubjects(curriculum.subjects);
+      })
+      .catch(() => {
+        // The existing screen stays usable, while the send action reports a local-server error.
+      });
+  }, []);
 
   /*
 
@@ -374,7 +390,7 @@ export const TutorHome: FC<TutorHomeProps> = () => {
 
     setSubject(null);
 
-    setLevel("");
+    setLearningSession(null);
 
     setBusy(false);
 
@@ -414,7 +430,7 @@ export const TutorHome: FC<TutorHomeProps> = () => {
 
     setSubject(sub);
 
-    setLevel(session.level);
+    setLearningSession(null);
 
     setShowHistory(false);
 
@@ -522,47 +538,55 @@ export const TutorHome: FC<TutorHomeProps> = () => {
     if (busy) return;
 
     setSubject(s);
+    setLearningSession(null);
 
     if (!askedRef.current.has(s.key)) {
 
       askedRef.current.add(s.key);
 
-      push({
-
-        id: nextId(),
-
-        role: "ai",
-
-        paragraphs: [
-
-          `${s.name} it is. Now choose your class in the small menu on the card.`,
-
-        ],
-
-      });
+      showTopics(s, level || "your registered class", true);
 
     }
 
   };
 
-  /*
+  const startLearningSession = async (selected: Subject, requestedTopic?: string) => {
+    const curriculum = apiSubjects.length ? apiSubjects : (await api<ApiCurriculum>("/students/me/curriculum")).subjects;
+    const serverSubject = curriculum.find((item) => item.name.trim().toLowerCase() === selected.name.trim().toLowerCase());
+    if (!serverSubject) throw new Error(`${selected.name} is not configured for this student's class yet.`);
+    const topics = await api<ApiTopic[]>(`/topics/subject/${serverSubject.id}`);
+    if (!topics.length) throw new Error(`No topics are configured for ${selected.name} yet.`);
+    const selectedTopic = requestedTopic
+      ? topics.find((item) => item.name.trim().toLowerCase() === requestedTopic.trim().toLowerCase()) || topics[0]
+      : topics[0];
+    const session = await api<{ id: string }>("/learning/sessions", {
+      method: "POST",
+      body: JSON.stringify({ subject_id: serverSubject.id, topic_id: selectedTopic.id }),
+    });
+    setLearningSession({ id: session.id, subjectKey: selected.key, topic: selectedTopic.name });
+    return session.id;
+  };
 
-   * Pick class.
-
-   */
-
-  const pickLevel = (lv: string) => {
-
-    if (busy || !subject) return;
-
-    setLevel(lv);
-
-    localStorage.setItem("studentLevel", lv);
-
-    window.dispatchEvent(new Event("student-level-updated"));
-
-    showTopics(subject, lv, true);
-
+  const askTeacher = async (selected: Subject, message: string, extra: Extra | undefined = "lesson", requestedTopic?: string) => {
+    if (busy) return;
+    setBusy(true);
+    setMessages((previous) => [...previous, { id: nextId(), role: "user", text: message }]);
+    try {
+      const sessionId = learningSession?.subjectKey === selected.key && (!requestedTopic || learningSession.topic.toLowerCase() === requestedTopic.toLowerCase())
+        ? learningSession.id
+        : await startLearningSession(selected, requestedTopic);
+      const reply = await api<{ ai_reply: { content: string } }>("/learning/session/message", {
+        method: "POST",
+        body: JSON.stringify({ session_id: sessionId, message }),
+      });
+      const paragraphs = reply.ai_reply.content.split(/\n\s*\n/).map((part) => part.trim()).filter(Boolean);
+      setMessages((previous) => [...previous, { id: nextId(), role: "ai", paragraphs: paragraphs.length ? paragraphs : [reply.ai_reply.content], extra, subject: selected.key, showActions: true }]);
+    } catch (reason) {
+      const detail = reason instanceof Error ? reason.message : "The local Artificial Teacher is unavailable.";
+      setMessages((previous) => [...previous, { id: nextId(), role: "ai", paragraphs: [detail], subject: selected.key }]);
+    } finally {
+      setBusy(false);
+    }
   };
 
   /*
@@ -607,39 +631,9 @@ export const TutorHome: FC<TutorHomeProps> = () => {
 
     } catch {}
 
-    const list: Msg[] = [];
-
-    if (withUser) {
-
-      list.push({
-
-        id: nextId(),
-
-        role: "user",
-
-        text: lesson,
-
-      });
-
-    }
-
-    list.push({
-
-      id: nextId(),
-
-      role: "ai",
-
-      paragraphs: lessonText(s, topic, lesson, lv),
-
-      extra: "lesson",
-
-      subject: s.key,
-
-      showActions: true,
-
-    });
-
-    push(...list);
+    void askTeacher(s, withUser
+      ? `Teach me ${lesson} in ${topic} for ${lv}. Explain step by step, show one guided example, then give me one practice exercise without revealing its answer.`
+      : `Continue teaching ${lesson} in ${topic}. Give me another guided example and one practice exercise without revealing its answer.`, "lesson", topic);
 
   };
 
@@ -649,17 +643,10 @@ export const TutorHome: FC<TutorHomeProps> = () => {
 
    */
 
-  const followUp = (label: string, reply: string) => {
+  const followUp = (label: string, _reply: string) => {
 
-    if (busy) return;
-
-    push(
-
-      { id: nextId(), role: "user", text: label },
-
-      { id: nextId(), role: "ai", paragraphs: [reply], showActions: true }
-
-    );
+    if (!subject) return;
+    void askTeacher(subject, label, "lesson");
 
   };
 
@@ -679,19 +666,11 @@ export const TutorHome: FC<TutorHomeProps> = () => {
 
     setDraft("");
 
-    const reply = subject
-
-      ? `Good question regarding ${subject.name}. This is where the AI answer will be dynamically generated.`
-
-      : "Let us pick a subject first so I can teach you at the right level. Choose one of the cards above.";
-
-    push(
-
-      { id: nextId(), role: "user", text },
-
-      { id: nextId(), role: "ai", paragraphs: [reply], showActions: true }
-
-    );
+    if (!subject) {
+      push({ id: nextId(), role: "user", text }, { id: nextId(), role: "ai", paragraphs: ["Choose a subject first so your local AI teacher can use the correct curriculum."], extra: "subjects" });
+      return;
+    }
+    void askTeacher(subject, text);
 
   };
 
@@ -741,13 +720,11 @@ export const TutorHome: FC<TutorHomeProps> = () => {
 
           selected={subject}
 
-          level={level}
-
           locked={topicsShown}
 
           onPick={pickSubject}
 
-          onLevel={pickLevel}
+          availableNames={apiSubjects.map((item) => item.name)}
 
         />
 

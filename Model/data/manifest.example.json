@@ -1,0 +1,26 @@
+{
+  "books": [
+    {
+      "file": "data/raw/mathematics/form-2/mathematics_form2.pdf",
+      "subject": "Mathematics",
+      "class_level": "Form 2",
+      "language": "en",
+      "source": "Mathematics for Secondary Schools, Form 2 (publisher: fill in)",
+      "edition": "fill in the edition/year printed on the book",
+      "license_note": "fill in: who allowed you to use it, and under what terms",
+      "topics": [
+        { "name": "Linear Equations", "pages": [12, 34] },
+        { "name": "Fractions",        "pages": [35, 60] }
+      ]
+    },
+    {
+      "file": "data/raw/mathematics/std-5/hisabati_darasa5.pdf",
+      "subject": "Mathematics",
+      "class_level": "Std 5",
+      "language": "sw",
+      "source": "Hisabati Darasa la Tano (publisher: fill in)",
+      "edition": "fill in",
+      "license_note": "fill in"
+    }
+  ]
+}

@@ -1,12 +1,66 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import logo from "../../assets/logo.jpeg";
 import heroBg from "../../assets/herobg.jpeg";
+import { registerStudent, signIn } from "../../lib/api";
+
+const toRegisteredClassLevel = (classLevel: string) => {
+  const standard = /^Standard ([1-7])$/.exec(classLevel);
+  if (standard) return `STD_${standard[1]}`;
+
+  const form = /^Form ([1-6])$/.exec(classLevel);
+  if (form) return `FORM_${form[1]}`;
+
+  return null;
+};
 
 const Register: React.FC = () => {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [educationLevel, setEducationLevel] = useState("");
   const [classLevel, setClassLevel] = useState("");
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setError("");
+
+    const form = new FormData(event.currentTarget);
+    const fullName = String(form.get("full_name") || "").trim();
+    const username = String(form.get("username") || "").trim();
+    const password = String(form.get("password") || "");
+    const confirmPassword = String(form.get("confirm_password") || "");
+    const registeredClassLevel = toRegisteredClassLevel(classLevel);
+
+    if (password !== confirmPassword) {
+      setError("The passwords do not match.");
+      return;
+    }
+
+    if (!registeredClassLevel) {
+      setError("Registration currently supports Standard 1–7 and Form 1–6.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await registerStudent({
+        username,
+        full_name: fullName,
+        password,
+        class_level: registeredClassLevel,
+      });
+      // Sign in immediately so this browser switches to the new student's
+      // own profile, progress, recommendations, and tutor context.
+      await signIn(username, password);
+      navigate("/tutorhome", { replace: true });
+    } catch (requestError) {
+      setError(requestError instanceof Error ? requestError.message : "Unable to create the account. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div
@@ -40,7 +94,13 @@ const Register: React.FC = () => {
           </div>
 
           {/* Registration Form */}
-          <form className="space-y-4">
+          <form className="space-y-4" onSubmit={handleSubmit}>
+
+            {error && (
+              <div role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                {error}
+              </div>
+            )}
 
             {/* Full Name */}
             <div>
@@ -50,20 +110,27 @@ const Register: React.FC = () => {
 
               <input
                 type="text"
+                name="full_name"
                 placeholder="Enter your full name"
+                required
                 className="w-full rounded-xl border border-gray-200 bg-white/80 px-4 py-3 text-sm text-gray-900 outline-none transition-all duration-200 focus:border-purple-600 focus:bg-white focus:ring-2 focus:ring-purple-100"
               />
             </div>
 
-            {/* Email */}
+            {/* Username */}
             <div>
               <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-700">
-                Email
+                Username
               </label>
 
               <input
-                type="email"
-                placeholder="Enter your email"
+                type="text"
+                name="username"
+                placeholder="Choose a username"
+                minLength={3}
+                maxLength={32}
+                pattern="[A-Za-z0-9_]+"
+                required
                 className="w-full rounded-xl border border-gray-200 bg-white/80 px-4 py-3 text-sm text-gray-900 outline-none transition-all duration-200 focus:border-purple-600 focus:bg-white focus:ring-2 focus:ring-purple-100"
               />
             </div>
@@ -80,6 +147,7 @@ const Register: React.FC = () => {
                   setEducationLevel(e.target.value);
                   setClassLevel("");
                 }}
+                required
                 className="w-full rounded-xl border border-gray-200 bg-white/80 px-4 py-3 text-sm text-gray-900 outline-none transition-all duration-200 focus:border-purple-600 focus:bg-white focus:ring-2 focus:ring-purple-100"
               >
                 <option value="">Select education level</option>
@@ -101,6 +169,7 @@ const Register: React.FC = () => {
                 value={classLevel}
                 onChange={(e) => setClassLevel(e.target.value)}
                 disabled={!educationLevel}
+                required
                 className="w-full rounded-xl border border-gray-200 bg-white/80 px-4 py-3 text-sm text-gray-900 outline-none transition-all duration-200 focus:border-purple-600 focus:bg-white focus:ring-2 focus:ring-purple-100 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-400"
               >
                 <option value="">
@@ -170,7 +239,10 @@ const Register: React.FC = () => {
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
+                  name="password"
                   placeholder="Create a password"
+                  minLength={4}
+                  required
                   className="w-full rounded-xl border border-gray-200 bg-white/80 px-4 py-3 pr-16 text-sm text-gray-900 outline-none transition-all duration-200 focus:border-purple-600 focus:bg-white focus:ring-2 focus:ring-purple-100"
                 />
 
@@ -192,7 +264,10 @@ const Register: React.FC = () => {
 
               <input
                 type="password"
+                name="confirm_password"
                 placeholder="Confirm your password"
+                minLength={4}
+                required
                 className="w-full rounded-xl border border-gray-200 bg-white/80 px-4 py-3 text-sm text-gray-900 outline-none transition-all duration-200 focus:border-purple-600 focus:bg-white focus:ring-2 focus:ring-purple-100"
               />
             </div>
@@ -200,9 +275,10 @@ const Register: React.FC = () => {
             {/* Create Account Button */}
             <button
               type="submit"
-              className="mt-2 w-full rounded-xl bg-gray-900 py-3.5 text-sm font-semibold text-white shadow-lg shadow-gray-900/10 transition-all duration-300 hover:bg-purple-600 hover:shadow-purple-500/25 hover:-translate-y-0.5 active:scale-95"
+              disabled={isSubmitting}
+              className="mt-2 w-full rounded-xl bg-gray-900 py-3.5 text-sm font-semibold text-white shadow-lg shadow-gray-900/10 transition-all duration-300 hover:bg-purple-600 hover:shadow-purple-500/25 hover:-translate-y-0.5 active:scale-95 disabled:cursor-not-allowed disabled:opacity-70"
             >
-              Create Account &rarr;
+              {isSubmitting ? "Creating account..." : "Create Account →"}
             </button>
           </form>
 

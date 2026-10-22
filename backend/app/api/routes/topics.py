@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from uuid import UUID
 
 from app.core.database import get_db
 from app.services.curriculum_service import CurriculumService
@@ -25,7 +26,7 @@ router = APIRouter(
     status_code=status.HTTP_201_CREATED,
 )
 def create_topic(
-    subject_id: int,
+    subject_id: UUID,
     topic_data: TopicCreate,
     db: Session = Depends(get_db),
 ):
@@ -33,7 +34,9 @@ def create_topic(
         return CurriculumService.create_topic(
             db,
             subject_id,
-            topic_data,
+            topic_data.name,
+            topic_data.description,
+            topic_data.sequence,
         )
 
     except ValueError as error:
@@ -52,19 +55,13 @@ def create_topic(
     response_model=TopicResponse,
 )
 def get_topic(
-    topic_id: int,
+    topic_id: UUID,
     db: Session = Depends(get_db),
 ):
-    if topic := CurriculumService.get_topic(
-        db,
-        topic_id,
-    ):
-        return topic
-
-    raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Topic not found",
-        )
+    try:
+        return CurriculumService.get_topic(db, topic_id)
+    except ValueError as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(error)) from error
 
 
 
@@ -78,21 +75,13 @@ def get_topic(
     response_model=list[TopicResponse],
 )
 def get_topics_by_subject(
-    subject_id: int,
+    subject_id: UUID,
     db: Session = Depends(get_db),
 ):
-    topics = CurriculumService.get_topics_by_subject(
-        db,
-        subject_id,
-    )
-
-    if topics is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Subject not found",
-        )
-
-    return topics
+    try:
+        return CurriculumService.get_topics_by_subject(db, subject_id)
+    except ValueError as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(error)) from error
 
 
 # =========================
@@ -104,22 +93,11 @@ def get_topics_by_subject(
     response_model=TopicResponse,
 )
 def update_topic(
-    topic_id: int,
+    topic_id: UUID,
     topic_data: TopicUpdate,
     db: Session = Depends(get_db),
 ):
-    if topic := CurriculumService.update_topic(
-        db,
-        topic_id,
-        topic_data,
-    ):
-        return topic
-
-    
-    raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Topic not found",
-        )
+    raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail="Topic updates are not available")
 
 
 # =========================
@@ -131,17 +109,7 @@ def update_topic(
     response_model=TopicResponse,
 )
 def deactivate_topic(
-    topic_id: int,
+    topic_id: UUID,
     db: Session = Depends(get_db),
 ):
-    if topic := CurriculumService.deactivate_topic(
-        db,
-        topic_id,
-    ):
-        return topic
-
-    
-    raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Topic not found",
-        )
+    raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail="Topic updates are not available")

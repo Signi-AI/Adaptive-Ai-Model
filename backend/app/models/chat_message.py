@@ -21,7 +21,7 @@ from enum import Enum
 from sqlalchemy import DateTime, ForeignKey, Text, func
 from sqlalchemy import Enum as PgEnum
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
 
@@ -40,8 +40,15 @@ class ChatMessage(Base):
     student_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
+    learning_session_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("learning_sessions.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
     role: Mapped[ChatRole] = mapped_column(PgEnum(ChatRole, name="chat_role"), nullable=False)
     content: Mapped[str] = mapped_column(Text, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
+    learning_session = relationship("LearningSession", foreign_keys=[learning_session_id])
