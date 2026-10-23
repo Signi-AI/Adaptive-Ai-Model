@@ -1,15 +1,21 @@
 /*
  * Development has no fixed IP address: opening Vite at 127.0.0.1, localhost,
  * or the school-server LAN address must call the backend on that same host.
- * A production build supplies VITE_API_BASE_URL from .env.production (or the
- * hosting provider's build environment) and therefore calls the deployed API.
+ * A production build should supply VITE_API_BASE_URL from Vercel's build
+ * environment. The public backend is kept as a production-only fallback so a
+ * Vercel build cannot accidentally call a visitor's localhost when that
+ * environment variable is absent.
  */
 const localApiUrl = () => {
   if (typeof window === "undefined") return "http://127.0.0.1:8000";
   return `http://${window.location.hostname}:8000`;
 };
 
-const baseUrl = (import.meta.env.VITE_API_BASE_URL?.trim() || localApiUrl()).replace(/\/$/, "");
+const productionApiFallback = "https://adaptive-ai-model.onrender.com";
+const configuredApiUrl = import.meta.env.VITE_API_BASE_URL?.trim();
+const baseUrl = (
+  configuredApiUrl || (import.meta.env.PROD ? productionApiFallback : localApiUrl())
+).replace(/\/$/, "");
 
 type Tokens = { access_token: string; refresh_token: string; expires_at: string };
 
